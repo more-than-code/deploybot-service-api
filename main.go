@@ -23,16 +23,16 @@ func main() {
 
 	api := api.NewApi()
 
-	g.GET("/api/pipelines", api.GetPipelines())
-	g.GET("/api/pipeline/:name", api.GetPipeline())
-	g.POST("/api/pipeline", api.PostPipeline())
-	g.PATCH("/api/pipeline", api.PatchPipeline())
-	g.PUT("/api/pipelineStatus", api.PutPipelineStatus())
+	g.GET("/pipelines", api.GetPipelines())
+	g.GET("/pipeline/:name", api.GetPipeline())
+	g.POST("/pipeline", api.PostPipeline())
+	g.PATCH("/pipeline", api.PatchPipeline())
+	g.PUT("/pipelineStatus", api.PutPipelineStatus())
 
-	g.GET("/api/task/:pid/:tid", api.GetTask())
-	g.POST("/api/task", api.PostTask())
-	g.PATCH("/api/task", api.PatchTask())
-	g.PUT("/api/taskStatus", api.PutTaskStatus())
+	g.GET("/task/:pid/:tid", api.GetTask())
+	g.POST("/task", api.PostTask())
+	g.PATCH("/task", api.PatchTask())
+	g.PUT("/taskStatus", api.PutTaskStatus())
 
 	g.Run(fmt.Sprintf(":%d", cfg.ServerPort))
 }
