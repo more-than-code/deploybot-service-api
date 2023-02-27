@@ -22,12 +22,13 @@ func main() {
 
 	g := gin.Default()
 
-	api := api.NewApi()
+	g.Use(middleware.CORSEnabled())
 
 	authorized := g.Group("/")
 
 	authorized.Use(middleware.AuthRequired())
 	{
+		api := api.NewApi()
 		authorized.GET("/pipelines", api.GetPipelines())
 		authorized.GET("/pipeline/:name", api.GetPipeline())
 		authorized.POST("/pipeline", api.PostPipeline())
@@ -38,6 +39,8 @@ func main() {
 		authorized.POST("/task", api.PostTask())
 		authorized.PATCH("/task", api.PatchTask())
 		authorized.PUT("/taskStatus", api.PutTaskStatus())
+
+		authorized.GET("/healthCheck", HealthCheckHandler())
 	}
 
 	g.GET("/healthCheck", HealthCheckHandler())
