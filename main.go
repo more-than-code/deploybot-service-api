@@ -22,8 +22,6 @@ func main() {
 
 	g := gin.Default()
 
-	// g.Use(middleware.CORSEnabled())
-
 	authorized := g.Group("/")
 
 	authorized.Use(middleware.AuthRequired())
