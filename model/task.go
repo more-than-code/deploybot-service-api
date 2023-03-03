@@ -14,17 +14,18 @@ type BuildConfig struct {
 }
 
 type DeployConfig struct {
-	ImageName   string   `json:"imageName"`
-	ImageTag    string   `json:"imageTag" bson:",omitempty"`
-	ServiceName string   `json:"serviceName" bson:",omitempty"`
-	MountSource string   `json:"mountSource" bson:",omitempty"`
-	MountTarget string   `json:"mountTarget" bson:",omitempty"`
-	AutoRemove  bool     `json:"autoRemove"`
-	Env         []string `json:"env" bson:",omitempty"`
-	HostPort    string   `json:"hostPort" bson:",omitempty"`
-	ExposedPort string   `json:"exposedPort" bson:",omitempty"`
-	NetworkId   string   `json:"networkId" bson:",omitempty"`
-	NetworkName string   `json:"networkName" bson:",omitempty"`
+	ImageName     string   `json:"imageName"`
+	ImageTag      string   `json:"imageTag" bson:",omitempty"`
+	ServiceName   string   `json:"serviceName" bson:",omitempty"`
+	MountSource   string   `json:"mountSource" bson:",omitempty"`
+	MountTarget   string   `json:"mountTarget" bson:",omitempty"`
+	AutoRemove    bool     `json:"autoRemove"`
+	RestartPolicy string   `json:"restartPolicy" bson:",omitempty"`
+	Env           []string `json:"env" bson:",omitempty"`
+	HostPort      string   `json:"hostPort" bson:",omitempty"`
+	ExposedPort   string   `json:"exposedPort" bson:",omitempty"`
+	NetworkId     string   `json:"networkId" bson:",omitempty"`
+	NetworkName   string   `json:"networkName" bson:",omitempty"`
 }
 
 type RestartConfig struct {
