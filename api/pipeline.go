@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/more-than-code/deploybot-service-api/model"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func (a *Api) PostPipeline() gin.HandlerFunc {
@@ -79,6 +80,22 @@ func (a *Api) GetPipeline() gin.HandlerFunc {
 		}
 
 		ctx.JSON(http.StatusOK, GetPipelineResponse{Payload: GetPipelineResponsePayload{pl}})
+	}
+}
+
+func (a *Api) DeletePipeline() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		id := ctx.Param("id")
+		objId, _ := primitive.ObjectIDFromHex(id)
+
+		err := a.repo.DeletePipeline(ctx, objId)
+
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, DeletePipelineResponse{Code: CodeClientError, Msg: err.Error()})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, DeletePipelineResponse{})
 	}
 }
 

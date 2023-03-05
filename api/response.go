@@ -55,6 +55,11 @@ type GetPipelineResponse struct {
 	Payload GetPipelineResponsePayload
 }
 
+type DeletePipelineResponse struct {
+	Code int
+	Msg  string
+}
+
 type PatchPipelineResponse struct {
 	Code int
 	Msg  string
@@ -81,6 +86,11 @@ type GetTaskResponse struct {
 	Code    int
 	Msg     string
 	Payload GetTaskResponsePayload
+}
+
+type DeleteTaskResponse struct {
+	Code int
+	Msg  string
 }
 
 type PatchTaskResponse struct {

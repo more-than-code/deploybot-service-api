@@ -104,7 +104,7 @@ type GetTasksInput struct {
 
 type DeleteTaskInput struct {
 	PipelineId primitive.ObjectID
-	TaskId     primitive.ObjectID
+	Id         primitive.ObjectID
 }
 
 func (t Task) Id2Hex() string {

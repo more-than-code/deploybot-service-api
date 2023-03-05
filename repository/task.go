@@ -65,7 +65,7 @@ func (r *Repository) GetTasks(ctx context.Context, input model.GetTasksInput) ([
 func (r *Repository) DeleteTask(ctx context.Context, input *model.DeleteTaskInput) error {
 	coll := r.mongoClient.Database("pipeline").Collection("pipelines")
 	filter := bson.M{"_id": input.PipelineId}
-	update := bson.M{"$pull": bson.M{"tasks": bson.M{"id": input.TaskId}}}
+	update := bson.M{"$pull": bson.M{"tasks": bson.M{"id": input.Id}}}
 	_, err := coll.UpdateOne(ctx, filter, update)
 
 	return err

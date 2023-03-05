@@ -35,12 +35,12 @@ func (a *Api) PostTask() gin.HandlerFunc {
 func (a *Api) GetTask() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		pidStr := ctx.Param("pid")
-		tidStr := ctx.Param("tid")
+		idStr := ctx.Param("id")
 
 		pid, _ := primitive.ObjectIDFromHex(pidStr)
-		tid, _ := primitive.ObjectIDFromHex(tidStr)
+		id, _ := primitive.ObjectIDFromHex(idStr)
 
-		input := model.GetTaskInput{PipelineId: pid, Id: tid}
+		input := model.GetTaskInput{PipelineId: pid, Id: id}
 		task, err := a.repo.GetTask(ctx, &input)
 
 		if err != nil {
@@ -49,6 +49,26 @@ func (a *Api) GetTask() gin.HandlerFunc {
 		}
 
 		ctx.JSON(http.StatusOK, GetTaskResponse{Payload: GetTaskResponsePayload{Task: task}})
+	}
+}
+
+func (a *Api) DeleteTask() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		pidStr := ctx.Param("pid")
+		idStr := ctx.Param("id")
+
+		pid, _ := primitive.ObjectIDFromHex(pidStr)
+		id, _ := primitive.ObjectIDFromHex(idStr)
+
+		input := model.DeleteTaskInput{PipelineId: pid, Id: id}
+		err := a.repo.DeleteTask(ctx, &input)
+
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, DeleteTaskResponse{Code: CodeServerError, Msg: err.Error()})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, DeleteTaskResponse{})
 	}
 }
 
