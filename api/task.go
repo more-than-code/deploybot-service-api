@@ -128,7 +128,6 @@ func (a *Api) PutTaskStatus() gin.HandlerFunc {
 					body, _ := json.Marshal(model.StreamWebhook{Payload: model.StreamWebhookPayload{PipelineId: pl.Id, TaskId: t.Id, Arguments: pl.Arguments}})
 
 					req, _ := http.NewRequest("POST", t.StreamWebhook, bytes.NewReader(body))
-					req.SetBasicAuth(a.cfg.PkUsername, a.cfg.PkPassword)
 					res, _ := http.DefaultClient.Do(req)
 
 					if res != nil {

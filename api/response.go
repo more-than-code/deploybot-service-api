@@ -34,9 +34,9 @@ type PostPipelineResponsePayload struct {
 	Id primitive.ObjectID
 }
 type PostPipelineResponse struct {
-	Code    int
-	Msg     string
-	Payload PostPipelineResponsePayload
+	Code    int                         `json:"code"`
+	Msg     string                      `json:"msg"`
+	Payload PostPipelineResponsePayload `json:"payload"`
 }
 
 type GetPipelinesResponse struct {
@@ -50,60 +50,82 @@ type GetPipelineResponsePayload struct {
 }
 
 type GetPipelineResponse struct {
-	Code    int
-	Msg     string
-	Payload GetPipelineResponsePayload
+	Code    int                        `json:"code"`
+	Msg     string                     `json:"msg"`
+	Payload GetPipelineResponsePayload `json:"payload"`
 }
 
 type DeletePipelineResponse struct {
-	Code int
-	Msg  string
+	Code int    `json:"code"`
+	Msg  string `json:"msg"`
 }
 
 type PatchPipelineResponse struct {
-	Code int
-	Msg  string
+	Code int    `json:"code"`
+	Msg  string `json:"msg"`
 }
 
 type PutPipelineStatusResponse struct {
-	Code int
-	Msg  string
+	Code int    `json:"code"`
+	Msg  string `json:"msg"`
 }
 
 type PostTaskResponsePayload struct {
 	Id primitive.ObjectID
 }
 type PostTaskResponse struct {
-	Code    int
-	Msg     string
-	Payload PostTaskResponsePayload
+	Code    int                     `json:"code"`
+	Msg     string                  `json:"msg"`
+	Payload PostTaskResponsePayload `json:"payload"`
 }
 
 type GetTaskResponsePayload struct {
 	Task *model.Task
 }
 type GetTaskResponse struct {
-	Code    int
-	Msg     string
-	Payload GetTaskResponsePayload
+	Code    int                    `json:"code"`
+	Msg     string                 `json:"msg"`
+	Payload GetTaskResponsePayload `json:"payload"`
 }
 
 type DeleteTaskResponse struct {
-	Code int
-	Msg  string
+	Code int    `json:"code"`
+	Msg  string `json:"msg"`
 }
 
 type PatchTaskResponse struct {
-	Code int
-	Msg  string
+	Code int    `json:"code"`
+	Msg  string `json:"msg"`
 }
 
 type PutTaskStatusResponse struct {
-	Code int
-	Msg  string
+	Code int    `json:"code"`
+	Msg  string `json:"msg"`
 }
 
 type WebhookResponse struct {
-	Code int
-	Msg  string
+	Code int    `json:"code"`
+	Msg  string `json:"msg"`
+}
+
+type AuthenticationResponse struct {
+	Msg     string                     `json:"msg"`
+	Code    int                        `json:"code"`
+	Payload model.AuthenticationOutput `json:"payload"`
+}
+
+type PostUserResponse struct {
+	Msg  string `json:"msg"`
+	Code int    `json:"code"`
+}
+
+type DeleteUserResponse struct {
+	Msg  string `json:"msg"`
+	Code int    `json:"code"`
+}
+
+type GetUserResponse struct {
+	Msg     string     `json:"msg"`
+	Code    int        `json:"code"`
+	Payload model.User `json:"payload"`
 }

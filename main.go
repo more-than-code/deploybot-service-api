@@ -39,6 +39,11 @@ func main() {
 		authorized.POST("/task", api.PostTask())
 		authorized.PATCH("/task", api.PatchTask())
 		authorized.PUT("/taskStatus", api.PutTaskStatus())
+
+		g.POST("/authenticate", api.Authenticate())
+		authorized.POST("/user", api.PostUser())
+		authorized.GET("/user", api.GetUser())
+		authorized.DELETE("/user/:id", api.DeleteUser())
 	}
 
 	g.GET("/healthCheck", HealthCheckHandler())
