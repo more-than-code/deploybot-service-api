@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/more-than-code/deploybot-service-api/model"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func (a *Api) PostTask() gin.HandlerFunc {
@@ -33,13 +34,13 @@ func (a *Api) PostTask() gin.HandlerFunc {
 
 func (a *Api) GetTask() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		var input model.GetTaskInput
-		err := ctx.BindJSON(&input)
+		pidStr := ctx.Param("pid")
+		idStr := ctx.Param("id")
 
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, GetTaskResponse{Code: CodeServerError, Msg: err.Error()})
-			return
-		}
+		pid, _ := primitive.ObjectIDFromHex(pidStr)
+		id, _ := primitive.ObjectIDFromHex(idStr)
+
+		input := model.GetTaskInput{PipelineId: pid, Id: id}
 
 		task, err := a.repo.GetTask(ctx, &input)
 
