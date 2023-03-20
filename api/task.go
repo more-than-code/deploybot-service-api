@@ -34,8 +34,8 @@ func (a *Api) PostTask() gin.HandlerFunc {
 
 func (a *Api) GetTask() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		pidStr := ctx.Param("pid")
-		idStr := ctx.Param("id")
+		pidStr := ctx.Query("pid")
+		idStr := ctx.Query("id")
 
 		pid, _ := primitive.ObjectIDFromHex(pidStr)
 		id, _ := primitive.ObjectIDFromHex(idStr)
