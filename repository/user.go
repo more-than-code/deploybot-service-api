@@ -34,6 +34,28 @@ func (r *Repository) CreateUser(ctx context.Context, input *model.CreateUserInpu
 	return nil
 }
 
+func (r *Repository) GetUsers(ctx context.Context, input model.GetUsersInput) (*model.GetUsersOutput, error) {
+	coll := r.mongoClient.Database("pipeline").Collection("users")
+
+	filter := bson.M{"_id": bson.M{"$in": input.UserIds}}
+
+	opts := options.FindOptions{Projection: bson.M{"password": 0}}
+	cursor, err := coll.Find(ctx, filter, &opts)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var output model.GetUsersOutput
+	if err = cursor.All(ctx, &output.Items); err != nil {
+		return nil, err
+	}
+
+	output.TotalCount = len(output.Items)
+
+	return &output, nil
+}
+
 func (r *Repository) DeleteUser(ctx context.Context, id primitive.ObjectID) error {
 	coll := r.mongoClient.Database("pipeline").Collection("users")
 

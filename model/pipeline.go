@@ -11,23 +11,21 @@ type Pipeline struct {
 	StoppedAt     primitive.DateTime `json:"stoppedAt"`
 	ScheduledAt   primitive.DateTime `json:"scheduledAt"`
 	Status        string             `json:"status"`
-	Arguments     []string           `json:"argumentss"`
+	Arguments     []string           `json:"arguments"`
 	Tasks         []Task             `json:"tasks"`
 	RepoWatched   string             `json:"repoWatched"`
 	BranchWatched string             `json:"branchWatched"`
 	AutoRun       bool               `json:"autoRun"`
+	ProjectId     primitive.ObjectID `json:"projectId"`
 }
 
-type CreatePipelineInputPayload struct {
+type CreatePipelineInput struct {
 	Name          string
 	Arguments     []string
 	RepoWatched   string
 	BranchWatched string
 	AutoRun       bool
-}
-
-type CreatePipelineInput struct {
-	Payload CreatePipelineInputPayload
+	ProjectId     primitive.ObjectID
 }
 
 type TaskFilter struct {
@@ -42,9 +40,10 @@ type GetPipelineInput struct {
 }
 
 type GetPipelinesInput struct {
-	RepoWatched   *string
-	BranchWatched *string
-	AutoRun       *bool
+	RepoWatched   *string `bson:",omitempty"`
+	BranchWatched *string `bson:",omitempty"`
+	AutoRun       *bool   `bson:",omitempty"`
+	ProjectId     primitive.ObjectID
 }
 
 type GetPipelinesOutput struct {
@@ -52,47 +51,23 @@ type GetPipelinesOutput struct {
 	Items      []Pipeline `json:"items"`
 }
 
-type UpdatePipelineInputPayload struct {
-	Name          *string
+type PipelineUpdate struct {
+	Name          *string             `bson:",omitempty"`
 	ScheduledAt   *primitive.DateTime `bson:",omitempty"`
-	Arguments     []string
-	RepoWatched   *string
-	BranchWatched *string
-	AutoRun       *bool
-}
-type UpdatePipelineInput struct {
-	Id      primitive.ObjectID
-	Payload UpdatePipelineInputPayload
+	Arguments     []string            `bson:",omitempty"`
+	RepoWatched   *string             `bson:",omitempty"`
+	BranchWatched *string             `bson:",omitempty"`
+	AutoRun       *bool               `bson:",omitempty"`
 }
 
-type UpdatePipelineStatusInputPayload struct {
-	Status string
+type UpdatePipelineInput struct {
+	Id       primitive.ObjectID
+	Pipeline PipelineUpdate
 }
+
 type UpdatePipelineStatusInput struct {
 	PipelineId primitive.ObjectID
-	Payload    UpdatePipelineStatusInputPayload
-}
-
-func (p Pipeline) Id2Hex() string {
-	return p.Id.Hex()
-}
-
-func (p Pipeline) CreatedAt2Str() string {
-	return p.CreatedAt.Time().String()
-}
-
-func (p Pipeline) ExecutedAt2Str() string {
-	if p.ExecutedAt == 0 {
-		return ""
+	Pipeline   struct {
+		Status string
 	}
-
-	return p.ExecutedAt.Time().String()
-}
-
-func (p Pipeline) StoppedAt2Str() string {
-	if p.StoppedAt == 0 {
-		return ""
-	}
-
-	return p.StoppedAt.Time().String()
 }

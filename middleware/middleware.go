@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"strings"
@@ -40,11 +41,11 @@ func AuthRequired() gin.HandlerFunc {
 		strArr := strings.Split(header, "Bearer ")
 
 		if len(strArr) > 1 {
-			_, err := helper.ParseTokenString(strArr[1])
+			userStr, err := helper.ParseTokenString(strArr[1])
 			if err == nil {
-				// c.Params = []gin.Param{{Key: "User", Value: userStr}}
-				// ctx := context.WithValue(c.Request.Context(), ginCtxKey, c)
-				// _ = c.Request.WithContext(ctx)
+				c.Params = append(c.Params, gin.Param{Key: "user", Value: userStr})
+				ctx := context.WithValue(c.Request.Context(), ginCtxKey, c)
+				_ = c.Request.WithContext(ctx)
 
 				c.Next()
 				return

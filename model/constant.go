@@ -26,6 +26,14 @@ const (
 	TaskRestart = "Restart"
 )
 
+type Role string
+
+const (
+	RoleOwner  Role = "Owner"
+	RoleAdmin  Role = "Admin"
+	RoleMember Role = "Member"
+)
+
 const (
 	CodeAuthenticationFailure = 100
 

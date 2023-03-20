@@ -18,10 +18,20 @@ type User struct {
 	Email     string             `json:"email"`
 	Password  string             `json:"password"`
 	CreatedAt primitive.DateTime `json:"createdAt"`
+	AvatarUrl string             `json:"avatarUrl"`
 }
 
 type CreateUserInput struct {
 	Email            string
 	Password         string
 	VerificationCode string
+}
+
+type GetUsersInput struct {
+	UserIds []primitive.ObjectID
+}
+
+type GetUsersOutput struct {
+	Items      []User `json:"items"`
+	TotalCount int    `json:"totalCount"`
 }

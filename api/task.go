@@ -28,7 +28,7 @@ func (a *Api) PostTask() gin.HandlerFunc {
 			return
 		}
 
-		ctx.JSON(http.StatusOK, PostTaskResponse{Payload: PostTaskResponsePayload{id}})
+		ctx.JSON(http.StatusOK, PostTaskResponse{Payload: &PostTaskResponsePayload{id}})
 	}
 }
 
@@ -48,7 +48,7 @@ func (a *Api) GetTask() gin.HandlerFunc {
 			return
 		}
 
-		ctx.JSON(http.StatusOK, GetTaskResponse{Payload: GetTaskResponsePayload{Task: task}})
+		ctx.JSON(http.StatusOK, GetTaskResponse{Payload: &GetTaskResponsePayload{Task: *task}})
 	}
 }
 
@@ -115,12 +115,12 @@ func (a *Api) PutTaskStatus() gin.HandlerFunc {
 		go func() {
 			pStatus := model.PipelineIdle
 
-			if input.Payload.Status == model.TaskDone {
+			if input.Task.Status == model.TaskDone {
 				autoRun := true
 				pl, _ := a.repo.GetPipeline(ctx, model.GetPipelineInput{Id: &input.PipelineId, TaskFilter: model.TaskFilter{UpstreamTaskId: &input.TaskId, AutoRun: &autoRun}})
 
 				if pl == nil || len(pl.Tasks) == 0 {
-					a.repo.UpdatePipelineStatus(ctx, model.UpdatePipelineStatusInput{PipelineId: input.PipelineId, Payload: model.UpdatePipelineStatusInputPayload{Status: model.PipelineIdle}})
+					a.repo.UpdatePipelineStatus(ctx, model.UpdatePipelineStatusInput{PipelineId: input.PipelineId, Pipeline: struct{ Status string }{Status: model.PipelineIdle}})
 					return
 				}
 
@@ -134,11 +134,11 @@ func (a *Api) PutTaskStatus() gin.HandlerFunc {
 						log.Println(res.Status)
 					}
 				}
-			} else if input.Payload.Status == model.TaskInProgress {
+			} else if input.Task.Status == model.TaskInProgress {
 				pStatus = model.PipelineBusy
 			}
 
-			a.repo.UpdatePipelineStatus(ctx, model.UpdatePipelineStatusInput{PipelineId: input.PipelineId, Payload: model.UpdatePipelineStatusInputPayload{Status: pStatus}})
+			a.repo.UpdatePipelineStatus(ctx, model.UpdatePipelineStatusInput{PipelineId: input.PipelineId, Pipeline: struct{ Status string }{Status: pStatus}})
 		}()
 	}
 }

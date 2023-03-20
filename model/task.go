@@ -50,33 +50,31 @@ type Task struct {
 	Type           string             `json:"type"`
 }
 
-type UpdateTaskInputPayload struct {
-	Name           *string
-	UpstreamTaskId *primitive.ObjectID
-	StreamWebhook  *string
-	ScheduledAt    *primitive.DateTime
-	Config         *interface{}
-	Remarks        *string
-	AutoRun        *bool
-	Timeout        *int64
-	Type           *string
-}
 type UpdateTaskInput struct {
 	PipelineId primitive.ObjectID
 	Id         primitive.ObjectID
-	Payload    UpdateTaskInputPayload
+	Task       struct {
+		Name           *string
+		UpstreamTaskId *primitive.ObjectID
+		StreamWebhook  *string
+		ScheduledAt    *primitive.DateTime
+		Config         *interface{}
+		Remarks        *string
+		AutoRun        *bool
+		Timeout        *int64
+		Type           *string
+	}
 }
 
-type UpdateTaskStatusInputPayload struct {
-	Status string
-}
 type UpdateTaskStatusInput struct {
 	PipelineId primitive.ObjectID
 	TaskId     primitive.ObjectID
-	Payload    UpdateTaskStatusInputPayload
+	Task       struct {
+		Status string
+	}
 }
 
-type CreateTaskInputPayload struct {
+type CreateTaskInputTask struct {
 	Id             primitive.ObjectID
 	Name           string
 	ScheduledAt    primitive.DateTime `bson:",omitempty"`
@@ -89,7 +87,7 @@ type CreateTaskInputPayload struct {
 }
 type CreateTaskInput struct {
 	PipelineId primitive.ObjectID
-	Payload    CreateTaskInputPayload
+	Task       CreateTaskInputTask
 }
 
 type GetTaskInput struct {
@@ -105,36 +103,4 @@ type GetTasksInput struct {
 type DeleteTaskInput struct {
 	PipelineId primitive.ObjectID
 	Id         primitive.ObjectID
-}
-
-func (t Task) Id2Hex() string {
-	return t.Id.Hex()
-}
-
-func (t Task) UpstreamtaskId2Hex() string {
-	if t.UpstreamTaskId.IsZero() {
-		return ""
-	}
-
-	return t.UpstreamTaskId.Hex()
-}
-
-func (t Task) CreatedAt2Str() string {
-	return t.CreatedAt.Time().String()
-}
-
-func (t Task) ExecutedAt2Str() string {
-	if t.ExecutedAt == 0 {
-		return ""
-	}
-
-	return t.ExecutedAt.Time().String()
-}
-
-func (t Task) StoppedAt2Str() string {
-	if t.StoppedAt == 0 {
-		return ""
-	}
-
-	return t.StoppedAt.Time().String()
 }

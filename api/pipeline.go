@@ -25,13 +25,16 @@ func (a *Api) PostPipeline() gin.HandlerFunc {
 			return
 		}
 
-		ctx.JSON(http.StatusOK, PostPipelineResponse{Payload: PostPipelineResponsePayload{id}})
+		ctx.JSON(http.StatusOK, PostPipelineResponse{Payload: &PostPipelineResponsePayload{id}})
 	}
 
 }
 
 func (a *Api) GetPipelines() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		pidStr := ctx.Param("pid")
+		pid, _ := primitive.ObjectIDFromHex(pidStr)
+
 		repoWatched, exists := ctx.GetQuery("repoWatched")
 
 		var rw *string
@@ -57,7 +60,7 @@ func (a *Api) GetPipelines() gin.HandlerFunc {
 			ar = &cVal
 		}
 
-		output, err := a.repo.GetPipelines(ctx, model.GetPipelinesInput{RepoWatched: rw, BranchWatched: bw, AutoRun: ar})
+		output, err := a.repo.GetPipelines(ctx, model.GetPipelinesInput{RepoWatched: rw, BranchWatched: bw, AutoRun: ar, ProjectId: pid})
 
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, GetPipelinesResponse{Code: CodeClientError, Msg: err.Error()})
@@ -79,7 +82,7 @@ func (a *Api) GetPipeline() gin.HandlerFunc {
 			return
 		}
 
-		ctx.JSON(http.StatusOK, GetPipelineResponse{Payload: GetPipelineResponsePayload{pl}})
+		ctx.JSON(http.StatusOK, GetPipelineResponse{Payload: &GetPipelineResponsePayload{*pl}})
 	}
 }
 

@@ -34,9 +34,9 @@ type PostPipelineResponsePayload struct {
 	Id primitive.ObjectID
 }
 type PostPipelineResponse struct {
-	Code    int                         `json:"code"`
-	Msg     string                      `json:"msg"`
-	Payload PostPipelineResponsePayload `json:"payload"`
+	Code    int                          `json:"code"`
+	Msg     string                       `json:"msg"`
+	Payload *PostPipelineResponsePayload `json:"payload"`
 }
 
 type GetPipelinesResponse struct {
@@ -46,13 +46,13 @@ type GetPipelinesResponse struct {
 }
 
 type GetPipelineResponsePayload struct {
-	Pipeline *model.Pipeline
+	Pipeline model.Pipeline
 }
 
 type GetPipelineResponse struct {
-	Code    int                        `json:"code"`
-	Msg     string                     `json:"msg"`
-	Payload GetPipelineResponsePayload `json:"payload"`
+	Code    int                         `json:"code"`
+	Msg     string                      `json:"msg"`
+	Payload *GetPipelineResponsePayload `json:"payload"`
 }
 
 type DeletePipelineResponse struct {
@@ -74,18 +74,18 @@ type PostTaskResponsePayload struct {
 	Id primitive.ObjectID
 }
 type PostTaskResponse struct {
-	Code    int                     `json:"code"`
-	Msg     string                  `json:"msg"`
-	Payload PostTaskResponsePayload `json:"payload"`
+	Code    int                      `json:"code"`
+	Msg     string                   `json:"msg"`
+	Payload *PostTaskResponsePayload `json:"payload"`
 }
 
 type GetTaskResponsePayload struct {
-	Task *model.Task
+	Task model.Task
 }
 type GetTaskResponse struct {
-	Code    int                    `json:"code"`
-	Msg     string                 `json:"msg"`
-	Payload GetTaskResponsePayload `json:"payload"`
+	Code    int                     `json:"code"`
+	Msg     string                  `json:"msg"`
+	Payload *GetTaskResponsePayload `json:"payload"`
 }
 
 type DeleteTaskResponse struct {
@@ -109,9 +109,9 @@ type WebhookResponse struct {
 }
 
 type AuthenticationResponse struct {
-	Msg     string                     `json:"msg"`
-	Code    int                        `json:"code"`
-	Payload model.AuthenticationOutput `json:"payload"`
+	Msg     string                      `json:"msg"`
+	Code    int                         `json:"code"`
+	Payload *model.AuthenticationOutput `json:"payload"`
 }
 
 type PostUserResponse struct {
@@ -125,7 +125,49 @@ type DeleteUserResponse struct {
 }
 
 type GetUserResponse struct {
-	Msg     string     `json:"msg"`
-	Code    int        `json:"code"`
-	Payload model.User `json:"payload"`
+	Msg     string      `json:"msg"`
+	Code    int         `json:"code"`
+	Payload *model.User `json:"payload"`
+}
+
+type GetUsersResponse struct {
+	Msg     string                `json:"msg"`
+	Code    int                   `json:"code"`
+	Payload *model.GetUsersOutput `json:"payload"`
+}
+
+type GetProjectsResponse struct {
+	Msg     string                   `json:"msg"`
+	Code    int                      `json:"code"`
+	Payload *model.GetProjectsOutput `json:"payload"`
+}
+
+type DeleteProjectResponse struct {
+	Msg  string `json:"msg"`
+	Code int    `json:"code"`
+}
+
+type PostProjectResponse struct {
+	Msg  string `json:"msg"`
+	Code int    `json:"code"`
+}
+
+type PatchProjectResponse struct {
+	Msg  string `json:"msg"`
+	Code int    `json:"code"`
+}
+
+type DeleteMemberResponse struct {
+	Msg  string `json:"msg"`
+	Code int    `json:"code"`
+}
+
+type PostMemberResponse struct {
+	Msg  string `json:"msg"`
+	Code int    `json:"code"`
+}
+
+type PatchMemberResponse struct {
+	Msg  string `json:"msg"`
+	Code int    `json:"code"`
 }

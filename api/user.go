@@ -63,7 +63,7 @@ func (a *Api) Authenticate() gin.HandlerFunc {
 		output.RefreshToken = rt
 		output.UserId = user.Id
 
-		res.Payload = output
+		res.Payload = &output
 
 		ctx.JSON(http.StatusOK, res)
 	}
@@ -125,6 +125,27 @@ func (a *Api) GetUser() gin.HandlerFunc {
 			return
 		}
 
-		ctx.JSON(http.StatusOK, GetUserResponse{Payload: *user})
+		ctx.JSON(http.StatusOK, GetUserResponse{Payload: user})
+	}
+}
+
+func (a *Api) GetUsers() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		uidStrList := ctx.QueryArray("uid")
+
+		uidList := make([]primitive.ObjectID, len(uidStrList))
+		for _, us := range uidStrList {
+			uid, _ := primitive.ObjectIDFromHex(us)
+			uidList = append(uidList, uid)
+		}
+
+		output, err := a.repo.GetUsers(ctx, model.GetUsersInput{UserIds: uidList})
+
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, GetUsersResponse{Code: CodeClientError, Msg: err.Error()})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, GetUsersResponse{Payload: output})
 	}
 }

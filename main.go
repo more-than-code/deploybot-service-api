@@ -27,7 +27,7 @@ func main() {
 	authorized.Use(middleware.AuthRequired())
 	{
 		api := api.NewApi()
-		authorized.GET("/pipelines", api.GetPipelines())
+		authorized.GET("/pipelines/:pid", api.GetPipelines())
 		authorized.GET("/pipeline/:name", api.GetPipeline())
 		authorized.DELETE("/pipeline/:id", api.DeletePipeline())
 		authorized.POST("/pipeline", api.PostPipeline())
@@ -40,9 +40,19 @@ func main() {
 		authorized.PATCH("/task", api.PatchTask())
 		authorized.PUT("/taskStatus", api.PutTaskStatus())
 
+		authorized.GET("/projects", api.GetProjects())
+		authorized.DELETE("/project/:id", api.DeleteProject())
+		authorized.POST("/project", api.PostProject())
+		authorized.PATCH("/project/:id", api.PatchProject())
+
+		authorized.DELETE("/member/:pid/:uid", api.DeleteMember())
+		authorized.POST("/member", api.PostMember())
+		authorized.PATCH("/member/:pid/:uid", api.PatchMember())
+
 		g.POST("/authenticate", api.Authenticate())
 		authorized.POST("/user", api.PostUser())
 		authorized.GET("/user", api.GetUser())
+		authorized.GET("/users", api.GetUsers())
 		authorized.DELETE("/user/:id", api.DeleteUser())
 	}
 

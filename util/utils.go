@@ -1,6 +1,10 @@
 package util
 
 import (
+	"encoding/json"
+
+	"github.com/gin-gonic/gin"
+	"github.com/more-than-code/deploybot-service-api/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -30,4 +34,14 @@ func HashPassword(password string) (string, error) {
 func CheckPasswordHash(password, hash string) error {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err
+}
+
+func GetUserFromContext(gc *gin.Context) model.User {
+	param := gc.Param("user")
+
+	var user model.User
+
+	json.Unmarshal([]byte(param), &user)
+
+	return user
 }

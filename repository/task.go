@@ -15,8 +15,8 @@ func (r *Repository) CreateTask(ctx context.Context, input *model.CreateTaskInpu
 	coll := r.mongoClient.Database("pipeline").Collection("pipelines")
 	filter := bson.M{"_id": input.PipelineId}
 
-	doc := util.StructToBsonDoc(input.Payload)
-	if input.Payload.Id.IsZero() {
+	doc := util.StructToBsonDoc(input.Task)
+	if input.Task.Id.IsZero() {
 		doc["id"] = primitive.NewObjectID()
 	}
 
@@ -77,32 +77,32 @@ func (r *Repository) UpdateTask(ctx context.Context, input model.UpdateTaskInput
 	doc := bson.M{}
 	doc["tasks.$.updatedat"] = primitive.NewDateTimeFromTime(time.Now().UTC())
 
-	if input.Payload.Name != nil {
-		doc["tasks.$.name"] = input.Payload.Name
+	if input.Task.Name != nil {
+		doc["tasks.$.name"] = input.Task.Name
 	}
-	if input.Payload.ScheduledAt != nil {
-		doc["tasks.$.scheduledat"] = input.Payload.ScheduledAt
+	if input.Task.ScheduledAt != nil {
+		doc["tasks.$.scheduledat"] = input.Task.ScheduledAt
 	}
-	if input.Payload.Config != nil {
-		doc["tasks.$.config"] = input.Payload.Config
+	if input.Task.Config != nil {
+		doc["tasks.$.config"] = input.Task.Config
 	}
-	if input.Payload.Remarks != nil {
-		doc["tasks.$.remarks"] = input.Payload.Remarks
+	if input.Task.Remarks != nil {
+		doc["tasks.$.remarks"] = input.Task.Remarks
 	}
-	if input.Payload.AutoRun != nil {
-		doc["tasks.$.autorun"] = input.Payload.AutoRun
+	if input.Task.AutoRun != nil {
+		doc["tasks.$.autorun"] = input.Task.AutoRun
 	}
-	if input.Payload.StreamWebhook != nil {
-		doc["tasks.$.streamwebhook"] = input.Payload.StreamWebhook
+	if input.Task.StreamWebhook != nil {
+		doc["tasks.$.streamwebhook"] = input.Task.StreamWebhook
 	}
-	if input.Payload.UpstreamTaskId != nil {
-		doc["tasks.$.upstreamtaskid"] = input.Payload.UpstreamTaskId
+	if input.Task.UpstreamTaskId != nil {
+		doc["tasks.$.upstreamtaskid"] = input.Task.UpstreamTaskId
 	}
-	if input.Payload.Timeout != nil {
-		doc["tasks.$.timeout"] = input.Payload.Timeout
+	if input.Task.Timeout != nil {
+		doc["tasks.$.timeout"] = input.Task.Timeout
 	}
-	if input.Payload.Type != nil {
-		doc["tasks.$.type"] = input.Payload.Type
+	if input.Task.Type != nil {
+		doc["tasks.$.type"] = input.Task.Type
 	}
 
 	update := bson.M{"$set": doc}
@@ -116,9 +116,9 @@ func (r *Repository) UpdateTask(ctx context.Context, input model.UpdateTaskInput
 func (r *Repository) UpdateTaskStatus(ctx context.Context, input *model.UpdateTaskStatusInput) error {
 	filter := bson.M{"_id": input.PipelineId, "tasks.id": input.TaskId}
 
-	doc := bson.M{"tasks.$.status": input.Payload.Status}
+	doc := bson.M{"tasks.$.status": input.Task.Status}
 
-	switch input.Payload.Status {
+	switch input.Task.Status {
 	case model.TaskInProgress:
 		doc["tasks.$.executedat"] = primitive.NewDateTimeFromTime(time.Now().UTC())
 		doc["tasks.$.stoppedat"] = nil

@@ -13,7 +13,7 @@ import (
 )
 
 func (r *Repository) CreatePipeline(ctx context.Context, input *model.CreatePipelineInput) (primitive.ObjectID, error) {
-	doc := util.StructToBsonDoc(input.Payload)
+	doc := util.StructToBsonDoc(input)
 
 	doc["createdat"] = primitive.NewDateTimeFromTime(time.Now().UTC())
 	doc["status"] = model.PipelineIdle
@@ -38,16 +38,7 @@ func (r *Repository) DeletePipeline(ctx context.Context, id primitive.ObjectID) 
 func (r *Repository) GetPipelines(ctx context.Context, input model.GetPipelinesInput) (*model.GetPipelinesOutput, error) {
 	coll := r.mongoClient.Database("pipeline").Collection("pipelines")
 
-	filter := bson.M{}
-	if input.RepoWatched != nil {
-		filter["repowatched"] = input.RepoWatched
-	}
-	if input.BranchWatched != nil {
-		filter["branchwatched"] = input.BranchWatched
-	}
-	if input.AutoRun != nil {
-		filter["autorun"] = input.AutoRun
-	}
+	filter := util.StructToBsonDoc(input)
 
 	opts := options.Find().SetSort(bson.D{{"executedat", -1}})
 	cursor, err := coll.Find(ctx, filter, opts)
@@ -107,23 +98,23 @@ func (r *Repository) UpdatePipeline(ctx context.Context, input model.UpdatePipel
 	doc := bson.M{}
 	doc["updatedat"] = primitive.NewDateTimeFromTime(time.Now().UTC())
 
-	if input.Payload.Name != nil {
-		doc["name"] = input.Payload.Name
+	if input.Pipeline.Name != nil {
+		doc["name"] = input.Pipeline.Name
 	}
-	if input.Payload.ScheduledAt != nil {
-		doc["scheduledat"] = input.Payload.ScheduledAt
+	if input.Pipeline.ScheduledAt != nil {
+		doc["scheduledat"] = input.Pipeline.ScheduledAt
 	}
-	if input.Payload.AutoRun != nil {
-		doc["autorun"] = input.Payload.AutoRun
+	if input.Pipeline.AutoRun != nil {
+		doc["autorun"] = input.Pipeline.AutoRun
 	}
-	if input.Payload.Arguments != nil {
-		doc["arguments"] = input.Payload.Arguments
+	if input.Pipeline.Arguments != nil {
+		doc["arguments"] = input.Pipeline.Arguments
 	}
-	if input.Payload.RepoWatched != nil {
-		doc["repowatched"] = input.Payload.RepoWatched
+	if input.Pipeline.RepoWatched != nil {
+		doc["repowatched"] = input.Pipeline.RepoWatched
 	}
-	if input.Payload.BranchWatched != nil {
-		doc["branchwatched"] = input.Payload.BranchWatched
+	if input.Pipeline.BranchWatched != nil {
+		doc["branchwatched"] = input.Pipeline.BranchWatched
 	}
 
 	update := bson.M{"$set": doc}
@@ -137,9 +128,9 @@ func (r *Repository) UpdatePipeline(ctx context.Context, input model.UpdatePipel
 func (r *Repository) UpdatePipelineStatus(ctx context.Context, input model.UpdatePipelineStatusInput) error {
 	filter := bson.M{"_id": input.PipelineId}
 
-	doc := bson.M{"status": input.Payload.Status}
+	doc := bson.M{"status": input.Pipeline.Status}
 
-	switch input.Payload.Status {
+	switch input.Pipeline.Status {
 	case model.PipelineBusy:
 		doc["executedat"] = primitive.NewDateTimeFromTime(time.Now().UTC())
 		doc["stoppedat"] = nil
