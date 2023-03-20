@@ -3,7 +3,7 @@ package model
 import "go.mongodb.org/mongo-driver/bson/primitive"
 
 type Member struct {
-	User      User               `json:"user"`
+	UserId    primitive.ObjectID `json:"userId"`
 	Role      Role               `json:"role"`
 	CreatedAt primitive.DateTime `json:"datetimeCreated"`
 }

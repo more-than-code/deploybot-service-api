@@ -5,7 +5,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/more-than-code/deploybot-service-api/model"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func (a *Api) PostMember() gin.HandlerFunc {
@@ -32,13 +31,15 @@ func (a *Api) PostMember() gin.HandlerFunc {
 
 func (a *Api) DeleteMember() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		pidStr := ctx.Param("pid")
-		pid, _ := primitive.ObjectIDFromHex(pidStr)
+		input := model.DeleteMemberInput{}
+		err := ctx.BindJSON(&input)
 
-		uidStr := ctx.Param("uid")
-		uid, _ := primitive.ObjectIDFromHex(uidStr)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, DeleteMemberResponse{Code: CodeClientError, Msg: err.Error()})
+			return
+		}
 
-		err := a.repo.DeleteMember(ctx, model.DeleteMemberInput{ProjectId: pid, UserId: uid})
+		err = a.repo.DeleteMember(ctx, input)
 
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, DeleteMemberResponse{Code: CodeClientError, Msg: err.Error()})
@@ -51,21 +52,15 @@ func (a *Api) DeleteMember() gin.HandlerFunc {
 
 func (a *Api) PatchMember() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		var member model.UpdateMember
-		err := ctx.BindJSON(&member)
-
-		pidStr := ctx.Param("pid")
-		pid, _ := primitive.ObjectIDFromHex(pidStr)
-
-		uidStr := ctx.Param("uid")
-		uid, _ := primitive.ObjectIDFromHex(uidStr)
+		var input model.UpdateMemberInput
+		err := ctx.BindJSON(&input)
 
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, PatchMemberResponse{Code: CodeClientError, Msg: err.Error()})
 			return
 		}
 
-		err = a.repo.UpdateMember(ctx, model.UpdateMemberInput{ProjectId: pid, UserId: uid, Member: member})
+		err = a.repo.UpdateMember(ctx, input)
 
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, PatchMemberResponse{Code: CodeServerError, Msg: err.Error()})

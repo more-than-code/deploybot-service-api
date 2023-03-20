@@ -34,8 +34,8 @@ type TaskFilter struct {
 }
 
 type GetPipelineInput struct {
-	Id         *primitive.ObjectID
-	Name       *string
+	Id         primitive.ObjectID
+	Name       string
 	TaskFilter TaskFilter
 }
 

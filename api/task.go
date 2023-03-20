@@ -8,7 +8,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/more-than-code/deploybot-service-api/model"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func (a *Api) PostTask() gin.HandlerFunc {
@@ -34,13 +33,14 @@ func (a *Api) PostTask() gin.HandlerFunc {
 
 func (a *Api) GetTask() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		pidStr := ctx.Param("pid")
-		idStr := ctx.Param("id")
+		var input model.GetTaskInput
+		err := ctx.BindJSON(&input)
 
-		pid, _ := primitive.ObjectIDFromHex(pidStr)
-		id, _ := primitive.ObjectIDFromHex(idStr)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, GetTaskResponse{Code: CodeServerError, Msg: err.Error()})
+			return
+		}
 
-		input := model.GetTaskInput{PipelineId: pid, Id: id}
 		task, err := a.repo.GetTask(ctx, &input)
 
 		if err != nil {
@@ -54,14 +54,15 @@ func (a *Api) GetTask() gin.HandlerFunc {
 
 func (a *Api) DeleteTask() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		pidStr := ctx.Param("pid")
-		idStr := ctx.Param("id")
+		var input model.DeleteTaskInput
+		err := ctx.BindJSON(&input)
 
-		pid, _ := primitive.ObjectIDFromHex(pidStr)
-		id, _ := primitive.ObjectIDFromHex(idStr)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, DeleteTaskResponse{Code: CodeServerError, Msg: err.Error()})
+			return
+		}
 
-		input := model.DeleteTaskInput{PipelineId: pid, Id: id}
-		err := a.repo.DeleteTask(ctx, &input)
+		err = a.repo.DeleteTask(ctx, &input)
 
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, DeleteTaskResponse{Code: CodeServerError, Msg: err.Error()})
@@ -117,7 +118,7 @@ func (a *Api) PutTaskStatus() gin.HandlerFunc {
 
 			if input.Task.Status == model.TaskDone {
 				autoRun := true
-				pl, _ := a.repo.GetPipeline(ctx, model.GetPipelineInput{Id: &input.PipelineId, TaskFilter: model.TaskFilter{UpstreamTaskId: &input.TaskId, AutoRun: &autoRun}})
+				pl, _ := a.repo.GetPipeline(ctx, model.GetPipelineInput{Id: input.PipelineId, TaskFilter: model.TaskFilter{UpstreamTaskId: &input.TaskId, AutoRun: &autoRun}})
 
 				if pl == nil || len(pl.Tasks) == 0 {
 					a.repo.UpdatePipelineStatus(ctx, model.UpdatePipelineStatusInput{PipelineId: input.PipelineId, Pipeline: struct{ Status string }{Status: model.PipelineIdle}})

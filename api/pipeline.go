@@ -32,7 +32,7 @@ func (a *Api) PostPipeline() gin.HandlerFunc {
 
 func (a *Api) GetPipelines() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		pidStr := ctx.Param("pid")
+		pidStr := ctx.Query("pid")
 		pid, _ := primitive.ObjectIDFromHex(pidStr)
 
 		repoWatched, exists := ctx.GetQuery("repoWatched")
@@ -73,8 +73,11 @@ func (a *Api) GetPipelines() gin.HandlerFunc {
 
 func (a *Api) GetPipeline() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		name := ctx.Param("name")
-		input := model.GetPipelineInput{Name: &name}
+		name := ctx.Query("name")
+		idStr := ctx.Query("id")
+		id, _ := primitive.ObjectIDFromHex(idStr)
+
+		input := model.GetPipelineInput{Name: name, Id: id}
 		pl, err := a.repo.GetPipeline(ctx, input)
 
 		if err != nil {

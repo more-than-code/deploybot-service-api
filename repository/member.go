@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/more-than-code/deploybot-service-api/model"
@@ -34,11 +35,15 @@ func (r *Repository) DeleteMember(ctx context.Context, input model.DeleteMemberI
 
 	filter := bson.M{"_id": input.ProjectId, "owneruserid": bson.M{"$ne": input.UserId}, "members.userid": input.UserId}
 
-	coll := r.mongoClient.Database("pipelines").Collection("projects")
-	_, err := coll.UpdateOne(ctx, filter, update)
+	coll := r.mongoClient.Database("pipeline").Collection("projects")
+	res, err := coll.UpdateOne(ctx, filter, update)
 
 	if err != nil {
 		return err
+	}
+
+	if res.ModifiedCount == 0 {
+		return errors.New("not deleted")
 	}
 
 	return nil
@@ -49,7 +54,7 @@ func (r *Repository) UpdateMember(ctx context.Context, input model.UpdateMemberI
 
 	update := bson.M{"$set": bson.M{"members.$.role": input.Member, "members.$.updatedat": primitive.NewDateTimeFromTime(time.Now().UTC())}}
 
-	coll := r.mongoClient.Database("pipelines").Collection("projects")
+	coll := r.mongoClient.Database("pipeline").Collection("projects")
 	_, err := coll.UpdateOne(ctx, filter, update)
 
 	if err != nil {

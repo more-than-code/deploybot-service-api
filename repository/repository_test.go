@@ -26,7 +26,7 @@ func TestGetPipeline(t *testing.T) {
 	aRun := true
 	tId, _ := primitive.ObjectIDFromHex("6363bebf3ad85d86c5e2a5c8")
 
-	pl, err := r.GetPipeline(context.TODO(), model.GetPipelineInput{Name: &pName, TaskFilter: model.TaskFilter{UpstreamTaskId: &tId, AutoRun: &aRun}})
+	pl, err := r.GetPipeline(context.TODO(), model.GetPipelineInput{Name: pName, TaskFilter: model.TaskFilter{UpstreamTaskId: &tId, AutoRun: &aRun}})
 
 	if err != nil {
 		t.Fatal(err)

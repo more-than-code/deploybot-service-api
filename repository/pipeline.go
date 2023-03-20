@@ -61,10 +61,10 @@ func (r *Repository) GetPipeline(ctx context.Context, input model.GetPipelineInp
 	coll := r.mongoClient.Database("pipeline").Collection("pipelines")
 
 	filter := bson.M{}
-	if input.Id != nil {
+	if !input.Id.IsZero() {
 		filter["_id"] = input.Id
 	}
-	if input.Name != nil {
+	if input.Name != "" {
 		filter["name"] = input.Name
 	}
 

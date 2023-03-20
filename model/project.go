@@ -7,7 +7,7 @@ type Project struct {
 	Name        string             `json:"name"`
 	AvatarUrl   string             `json:"avatarUrl"`
 	OwnerUserId primitive.ObjectID `json:"ownerUserId"`
-	// Members     []Member           `json:"members"`
+	Members     []Member           `json:"members"`
 	// Pipelines   []Pipeline         `json:"pipelines"`
 	CreatedAt primitive.DateTime `json:"createdAt"`
 	UpdatedAt primitive.DateTime `json:"updatedAt"`

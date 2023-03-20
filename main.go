@@ -27,15 +27,15 @@ func main() {
 	authorized.Use(middleware.AuthRequired())
 	{
 		api := api.NewApi()
-		authorized.GET("/pipelines/:pid", api.GetPipelines())
-		authorized.GET("/pipeline/:name", api.GetPipeline())
+		authorized.GET("/pipelines", api.GetPipelines())
+		authorized.GET("/pipeline", api.GetPipeline())
 		authorized.DELETE("/pipeline/:id", api.DeletePipeline())
 		authorized.POST("/pipeline", api.PostPipeline())
 		authorized.PATCH("/pipeline", api.PatchPipeline())
 		authorized.PUT("/pipelineStatus", api.PutPipelineStatus())
 
-		authorized.GET("/task/:pid/:id", api.GetTask())
-		authorized.DELETE("/task/:pid/:id", api.DeleteTask())
+		authorized.GET("/task", api.GetTask())
+		authorized.DELETE("/task", api.DeleteTask())
 		authorized.POST("/task", api.PostTask())
 		authorized.PATCH("/task", api.PatchTask())
 		authorized.PUT("/taskStatus", api.PutTaskStatus())
@@ -45,9 +45,9 @@ func main() {
 		authorized.POST("/project", api.PostProject())
 		authorized.PATCH("/project/:id", api.PatchProject())
 
-		authorized.DELETE("/member/:pid/:uid", api.DeleteMember())
+		authorized.DELETE("/member", api.DeleteMember())
 		authorized.POST("/member", api.PostMember())
-		authorized.PATCH("/member/:pid/:uid", api.PatchMember())
+		authorized.PATCH("/member", api.PatchMember())
 
 		g.POST("/authenticate", api.Authenticate())
 		authorized.POST("/user", api.PostUser())
