@@ -4,14 +4,14 @@ import (
 	"context"
 	"testing"
 
-	"github.com/more-than-code/deploybot-service-api/model"
+	types "github.com/more-than-code/deploybot-service-api/deploybot-types"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func TestGetTasks(t *testing.T) {
 	r, _ := NewRepository()
 
-	tasks, err := r.GetPipelines(context.TODO(), model.GetPipelinesInput{})
+	tasks, err := r.GetPipelines(context.TODO(), types.GetPipelinesInput{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -26,7 +26,7 @@ func TestGetPipeline(t *testing.T) {
 	aRun := true
 	tId, _ := primitive.ObjectIDFromHex("6363bebf3ad85d86c5e2a5c8")
 
-	pl, err := r.GetPipeline(context.TODO(), model.GetPipelineInput{Name: pName, TaskFilter: model.TaskFilter{UpstreamTaskId: &tId, AutoRun: &aRun}})
+	pl, err := r.GetPipeline(context.TODO(), types.GetPipelineInput{Name: pName, TaskFilter: types.TaskFilter{UpstreamTaskId: &tId, AutoRun: &aRun}})
 
 	if err != nil {
 		t.Fatal(err)

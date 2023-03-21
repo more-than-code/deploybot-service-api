@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/more-than-code/deploybot-service-api/model"
+	types "github.com/more-than-code/deploybot-service-api/deploybot-types"
 	"github.com/more-than-code/deploybot-service-api/util"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -12,11 +12,11 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func (r *Repository) CreatePipeline(ctx context.Context, input *model.CreatePipelineInput) (primitive.ObjectID, error) {
+func (r *Repository) CreatePipeline(ctx context.Context, input *types.CreatePipelineInput) (primitive.ObjectID, error) {
 	doc := util.StructToBsonDoc(input)
 
 	doc["createdat"] = primitive.NewDateTimeFromTime(time.Now().UTC())
-	doc["status"] = model.PipelineIdle
+	doc["status"] = types.PipelineIdle
 
 	coll := r.mongoClient.Database("pipeline").Collection("pipelines")
 	result, err := coll.InsertOne(ctx, doc)
@@ -35,7 +35,7 @@ func (r *Repository) DeletePipeline(ctx context.Context, id primitive.ObjectID) 
 	return err
 }
 
-func (r *Repository) GetPipelines(ctx context.Context, input model.GetPipelinesInput) (*model.GetPipelinesOutput, error) {
+func (r *Repository) GetPipelines(ctx context.Context, input types.GetPipelinesInput) (*types.GetPipelinesOutput, error) {
 	coll := r.mongoClient.Database("pipeline").Collection("pipelines")
 
 	filter := util.StructToBsonDoc(input)
@@ -47,7 +47,7 @@ func (r *Repository) GetPipelines(ctx context.Context, input model.GetPipelinesI
 		return nil, err
 	}
 
-	var output model.GetPipelinesOutput
+	var output types.GetPipelinesOutput
 	if err = cursor.All(ctx, &output.Items); err != nil {
 		return nil, err
 	}
@@ -57,7 +57,7 @@ func (r *Repository) GetPipelines(ctx context.Context, input model.GetPipelinesI
 	return &output, nil
 }
 
-func (r *Repository) GetPipeline(ctx context.Context, input model.GetPipelineInput) (*model.Pipeline, error) {
+func (r *Repository) GetPipeline(ctx context.Context, input types.GetPipelineInput) (*types.Pipeline, error) {
 	coll := r.mongoClient.Database("pipeline").Collection("pipelines")
 
 	filter := bson.M{}
@@ -82,7 +82,7 @@ func (r *Repository) GetPipeline(ctx context.Context, input model.GetPipelineInp
 		opts.SetProjection(bson.M{"arguments": 1, "tasks": bson.M{"$elemMatch": taskFilter}})
 	}
 
-	var pipeline model.Pipeline
+	var pipeline types.Pipeline
 	err := coll.FindOne(ctx, filter, &opts).Decode(&pipeline)
 
 	if err != nil {
@@ -92,7 +92,7 @@ func (r *Repository) GetPipeline(ctx context.Context, input model.GetPipelineInp
 	return &pipeline, nil
 }
 
-func (r *Repository) UpdatePipeline(ctx context.Context, input model.UpdatePipelineInput) error {
+func (r *Repository) UpdatePipeline(ctx context.Context, input types.UpdatePipelineInput) error {
 	filter := bson.M{"_id": input.Id}
 
 	doc := bson.M{}
@@ -125,16 +125,16 @@ func (r *Repository) UpdatePipeline(ctx context.Context, input model.UpdatePipel
 	return err
 }
 
-func (r *Repository) UpdatePipelineStatus(ctx context.Context, input model.UpdatePipelineStatusInput) error {
+func (r *Repository) UpdatePipelineStatus(ctx context.Context, input types.UpdatePipelineStatusInput) error {
 	filter := bson.M{"_id": input.PipelineId}
 
 	doc := bson.M{"status": input.Pipeline.Status}
 
 	switch input.Pipeline.Status {
-	case model.PipelineBusy:
+	case types.PipelineBusy:
 		doc["executedat"] = primitive.NewDateTimeFromTime(time.Now().UTC())
 		doc["stoppedat"] = nil
-	case model.PipelineIdle:
+	case types.PipelineIdle:
 		doc["stoppedat"] = primitive.NewDateTimeFromTime(time.Now().UTC())
 	}
 

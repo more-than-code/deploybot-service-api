@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/gin-gonic/gin"
-	"github.com/more-than-code/deploybot-service-api/model"
+	types "github.com/more-than-code/deploybot-service-api/deploybot-types"
 	"go.mongodb.org/mongo-driver/bson"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -36,10 +36,10 @@ func CheckPasswordHash(password, hash string) error {
 	return err
 }
 
-func GetUserFromContext(gc *gin.Context) model.User {
+func GetUserFromContext(gc *gin.Context) types.User {
 	param := gc.Param("user")
 
-	var user model.User
+	var user types.User
 
 	json.Unmarshal([]byte(param), &user)
 

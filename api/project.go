@@ -4,45 +4,45 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/more-than-code/deploybot-service-api/model"
+	types "github.com/more-than-code/deploybot-service-api/deploybot-types"
 	"github.com/more-than-code/deploybot-service-api/util"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func (a *Api) PostProject() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		var input model.CreateProjectInput
+		var input types.CreateProjectInput
 		err := ctx.BindJSON(&input)
 
 		input.UserId = util.GetUserFromContext(ctx).Id
 
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, PostProjectResponse{Code: CodeClientError, Msg: err.Error()})
+			ctx.JSON(http.StatusBadRequest, types.PostProjectResponse{Code: types.CodeClientError, Msg: err.Error()})
 			return
 		}
 
 		_, err = a.repo.CreateProject(ctx, &input)
 
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, PostProjectResponse{Code: CodeServerError, Msg: err.Error()})
+			ctx.JSON(http.StatusBadRequest, types.PostProjectResponse{Code: types.CodeServerError, Msg: err.Error()})
 			return
 		}
 
-		ctx.JSON(http.StatusOK, PostProjectResponse{})
+		ctx.JSON(http.StatusOK, types.PostProjectResponse{})
 	}
 
 }
 
 func (a *Api) GetProjects() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		output, err := a.repo.GetProjects(ctx, model.GetProjectsInput{UserId: util.GetUserFromContext(ctx).Id})
+		output, err := a.repo.GetProjects(ctx, types.GetProjectsInput{UserId: util.GetUserFromContext(ctx).Id})
 
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, GetProjectsResponse{Code: CodeClientError, Msg: err.Error()})
+			ctx.JSON(http.StatusBadRequest, types.GetProjectsResponse{Code: types.CodeClientError, Msg: err.Error()})
 			return
 		}
 
-		ctx.JSON(http.StatusOK, GetProjectsResponse{Payload: output})
+		ctx.JSON(http.StatusOK, types.GetProjectsResponse{Payload: output})
 	}
 }
 
@@ -51,37 +51,37 @@ func (a *Api) DeleteProject() gin.HandlerFunc {
 		id := ctx.Param("pid")
 		objId, _ := primitive.ObjectIDFromHex(id)
 
-		err := a.repo.DeleteProject(ctx, model.DeleteProjectInput{Id: objId, UserId: util.GetUserFromContext(ctx).Id})
+		err := a.repo.DeleteProject(ctx, types.DeleteProjectInput{Id: objId, UserId: util.GetUserFromContext(ctx).Id})
 
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, DeleteProjectResponse{Code: CodeClientError, Msg: err.Error()})
+			ctx.JSON(http.StatusBadRequest, types.DeleteProjectResponse{Code: types.CodeClientError, Msg: err.Error()})
 			return
 		}
 
-		ctx.JSON(http.StatusOK, DeleteProjectResponse{})
+		ctx.JSON(http.StatusOK, types.DeleteProjectResponse{})
 	}
 }
 
 func (a *Api) PatchProject() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		var project model.UpdateProject
+		var project types.UpdateProject
 		err := ctx.BindJSON(&project)
 
 		idStr := ctx.Param("id")
 		id, _ := primitive.ObjectIDFromHex(idStr)
 
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, PatchProjectResponse{Code: CodeClientError, Msg: err.Error()})
+			ctx.JSON(http.StatusBadRequest, types.PatchProjectResponse{Code: types.CodeClientError, Msg: err.Error()})
 			return
 		}
 
-		err = a.repo.UpdateProject(ctx, model.UpdateProjectInput{Id: id, UserId: util.GetUserFromContext(ctx).Id, Project: project})
+		err = a.repo.UpdateProject(ctx, types.UpdateProjectInput{Id: id, UserId: util.GetUserFromContext(ctx).Id, Project: project})
 
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, PatchProjectResponse{Code: CodeServerError, Msg: err.Error()})
+			ctx.JSON(http.StatusBadRequest, types.PatchProjectResponse{Code: types.CodeServerError, Msg: err.Error()})
 			return
 		}
 
-		ctx.JSON(http.StatusOK, PatchProjectResponse{})
+		ctx.JSON(http.StatusOK, types.PatchProjectResponse{})
 	}
 }

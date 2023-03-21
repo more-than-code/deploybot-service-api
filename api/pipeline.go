@@ -4,28 +4,28 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/more-than-code/deploybot-service-api/model"
+	types "github.com/more-than-code/deploybot-service-api/deploybot-types"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func (a *Api) PostPipeline() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		var input model.CreatePipelineInput
+		var input types.CreatePipelineInput
 		err := ctx.BindJSON(&input)
 
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, PostPipelineResponse{Code: CodeClientError, Msg: err.Error()})
+			ctx.JSON(http.StatusBadRequest, types.PostPipelineResponse{Code: types.CodeClientError, Msg: err.Error()})
 			return
 		}
 
 		id, err := a.repo.CreatePipeline(ctx, &input)
 
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, PostPipelineResponse{Code: CodeServerError, Msg: err.Error()})
+			ctx.JSON(http.StatusBadRequest, types.PostPipelineResponse{Code: types.CodeServerError, Msg: err.Error()})
 			return
 		}
 
-		ctx.JSON(http.StatusOK, PostPipelineResponse{Payload: &PostPipelineResponsePayload{id}})
+		ctx.JSON(http.StatusOK, types.PostPipelineResponse{Payload: &types.PostPipelineResponsePayload{id}})
 	}
 
 }
@@ -60,14 +60,14 @@ func (a *Api) GetPipelines() gin.HandlerFunc {
 			ar = &cVal
 		}
 
-		output, err := a.repo.GetPipelines(ctx, model.GetPipelinesInput{RepoWatched: rw, BranchWatched: bw, AutoRun: ar, ProjectId: pid})
+		output, err := a.repo.GetPipelines(ctx, types.GetPipelinesInput{RepoWatched: rw, BranchWatched: bw, AutoRun: ar, ProjectId: pid})
 
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, GetPipelinesResponse{Code: CodeClientError, Msg: err.Error()})
+			ctx.JSON(http.StatusBadRequest, types.GetPipelinesResponse{Code: types.CodeClientError, Msg: err.Error()})
 			return
 		}
 
-		ctx.JSON(http.StatusOK, GetPipelinesResponse{Payload: output})
+		ctx.JSON(http.StatusOK, types.GetPipelinesResponse{Payload: output})
 	}
 }
 
@@ -77,15 +77,15 @@ func (a *Api) GetPipeline() gin.HandlerFunc {
 		idStr := ctx.Query("id")
 		id, _ := primitive.ObjectIDFromHex(idStr)
 
-		input := model.GetPipelineInput{Name: name, Id: id}
+		input := types.GetPipelineInput{Name: name, Id: id}
 		pl, err := a.repo.GetPipeline(ctx, input)
 
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, GetPipelineResponse{Code: CodeClientError, Msg: err.Error()})
+			ctx.JSON(http.StatusBadRequest, types.GetPipelineResponse{Code: types.CodeClientError, Msg: err.Error()})
 			return
 		}
 
-		ctx.JSON(http.StatusOK, GetPipelineResponse{Payload: &GetPipelineResponsePayload{*pl}})
+		ctx.JSON(http.StatusOK, types.GetPipelineResponse{Payload: &types.GetPipelineResponsePayload{*pl}})
 	}
 }
 
@@ -97,52 +97,52 @@ func (a *Api) DeletePipeline() gin.HandlerFunc {
 		err := a.repo.DeletePipeline(ctx, objId)
 
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, DeletePipelineResponse{Code: CodeClientError, Msg: err.Error()})
+			ctx.JSON(http.StatusBadRequest, types.DeletePipelineResponse{Code: types.CodeClientError, Msg: err.Error()})
 			return
 		}
 
-		ctx.JSON(http.StatusOK, DeletePipelineResponse{})
+		ctx.JSON(http.StatusOK, types.DeletePipelineResponse{})
 	}
 }
 
 func (a *Api) PatchPipeline() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		var input model.UpdatePipelineInput
+		var input types.UpdatePipelineInput
 		err := ctx.BindJSON(&input)
 
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, PatchPipelineResponse{Code: CodeClientError, Msg: err.Error()})
+			ctx.JSON(http.StatusBadRequest, types.PatchPipelineResponse{Code: types.CodeClientError, Msg: err.Error()})
 			return
 		}
 
 		err = a.repo.UpdatePipeline(ctx, input)
 
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, PatchPipelineResponse{Code: CodeServerError, Msg: err.Error()})
+			ctx.JSON(http.StatusBadRequest, types.PatchPipelineResponse{Code: types.CodeServerError, Msg: err.Error()})
 			return
 		}
 
-		ctx.JSON(http.StatusOK, PatchPipelineResponse{})
+		ctx.JSON(http.StatusOK, types.PatchPipelineResponse{})
 	}
 }
 
 func (a *Api) PutPipelineStatus() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		var input model.UpdatePipelineStatusInput
+		var input types.UpdatePipelineStatusInput
 		err := ctx.BindJSON(&input)
 
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, PutPipelineStatusResponse{Code: CodeClientError, Msg: err.Error()})
+			ctx.JSON(http.StatusBadRequest, types.PutPipelineStatusResponse{Code: types.CodeClientError, Msg: err.Error()})
 			return
 		}
 
 		err = a.repo.UpdatePipelineStatus(ctx, input)
 
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, PutPipelineStatusResponse{Code: CodeServerError, Msg: err.Error()})
+			ctx.JSON(http.StatusBadRequest, types.PutPipelineStatusResponse{Code: types.CodeServerError, Msg: err.Error()})
 			return
 		}
 
-		ctx.JSON(http.StatusOK, PutPipelineStatusResponse{})
+		ctx.JSON(http.StatusOK, types.PutPipelineStatusResponse{})
 	}
 }

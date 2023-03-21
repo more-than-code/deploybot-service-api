@@ -5,14 +5,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/more-than-code/deploybot-service-api/model"
+	types "github.com/more-than-code/deploybot-service-api/deploybot-types"
 	"github.com/more-than-code/deploybot-service-api/util"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func (r *Repository) CreateUser(ctx context.Context, input *model.CreateUserInput) error {
+func (r *Repository) CreateUser(ctx context.Context, input *types.CreateUserInput) error {
 	hashedPassword, err := util.HashPassword(input.Password)
 
 	if err != nil {
@@ -34,7 +34,7 @@ func (r *Repository) CreateUser(ctx context.Context, input *model.CreateUserInpu
 	return nil
 }
 
-func (r *Repository) GetUsers(ctx context.Context, input model.GetUsersInput) (*model.GetUsersOutput, error) {
+func (r *Repository) GetUsers(ctx context.Context, input types.GetUsersInput) (*types.GetUsersOutput, error) {
 	coll := r.mongoClient.Database("pipeline").Collection("users")
 
 	filter := bson.M{"_id": bson.M{"$in": input.UserIds}}
@@ -46,7 +46,7 @@ func (r *Repository) GetUsers(ctx context.Context, input model.GetUsersInput) (*
 		return nil, err
 	}
 
-	var output model.GetUsersOutput
+	var output types.GetUsersOutput
 	if err = cursor.All(ctx, &output.Items); err != nil {
 		return nil, err
 	}
@@ -68,13 +68,13 @@ func (r *Repository) DeleteUser(ctx context.Context, id primitive.ObjectID) erro
 	return nil
 }
 
-func (r *Repository) GetUserByEmail(ctx context.Context, email string) (*model.User, error) {
+func (r *Repository) GetUserByEmail(ctx context.Context, email string) (*types.User, error) {
 	coll := r.mongoClient.Database("pipeline").Collection("users")
 
 	filter := bson.M{}
 	filter["email"] = strings.ToLower(email)
 
-	user := &model.User{}
+	user := &types.User{}
 
 	err := coll.FindOne(ctx, filter).Decode(user)
 
@@ -85,10 +85,10 @@ func (r *Repository) GetUserByEmail(ctx context.Context, email string) (*model.U
 	return user, nil
 }
 
-func (r *Repository) GetUserById(ctx context.Context, id primitive.ObjectID) (*model.User, error) {
+func (r *Repository) GetUserById(ctx context.Context, id primitive.ObjectID) (*types.User, error) {
 	coll := r.mongoClient.Database("pipeline").Collection("users")
 
-	user := &model.User{}
+	user := &types.User{}
 
 	opts := options.FindOneOptions{Projection: bson.M{"password": 0}}
 

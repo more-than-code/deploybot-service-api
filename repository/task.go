@@ -4,14 +4,14 @@ import (
 	"context"
 	"time"
 
-	"github.com/more-than-code/deploybot-service-api/model"
+	types "github.com/more-than-code/deploybot-service-api/deploybot-types"
 	"github.com/more-than-code/deploybot-service-api/util"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func (r *Repository) CreateTask(ctx context.Context, input *model.CreateTaskInput) (primitive.ObjectID, error) {
+func (r *Repository) CreateTask(ctx context.Context, input *types.CreateTaskInput) (primitive.ObjectID, error) {
 	coll := r.mongoClient.Database("pipeline").Collection("pipelines")
 	filter := bson.M{"_id": input.PipelineId}
 
@@ -20,7 +20,7 @@ func (r *Repository) CreateTask(ctx context.Context, input *model.CreateTaskInpu
 		doc["id"] = primitive.NewObjectID()
 	}
 
-	doc["status"] = model.TaskPending
+	doc["status"] = types.TaskPending
 	doc["createdat"] = primitive.NewDateTimeFromTime(time.Now().UTC())
 
 	update := bson.M{"$push": bson.M{"tasks": doc}}
@@ -29,12 +29,12 @@ func (r *Repository) CreateTask(ctx context.Context, input *model.CreateTaskInpu
 	return doc["id"].(primitive.ObjectID), err
 }
 
-func (r *Repository) GetTask(ctx context.Context, input *model.GetTaskInput) (*model.Task, error) {
+func (r *Repository) GetTask(ctx context.Context, input *types.GetTaskInput) (*types.Task, error) {
 	coll := r.mongoClient.Database("pipeline").Collection("pipelines")
 	filter := bson.M{"_id": input.PipelineId, "tasks.id": input.Id}
 
 	opts := options.FindOneOptions{Projection: bson.M{"tasks.$": 1}}
-	var pipeline model.Pipeline
+	var pipeline types.Pipeline
 	err := coll.FindOne(ctx, filter, &opts).Decode(&pipeline)
 
 	if err != nil {
@@ -44,7 +44,7 @@ func (r *Repository) GetTask(ctx context.Context, input *model.GetTaskInput) (*m
 	return &pipeline.Tasks[0], nil
 }
 
-func (r *Repository) GetTasks(ctx context.Context, input model.GetTasksInput) ([]model.Task, error) {
+func (r *Repository) GetTasks(ctx context.Context, input types.GetTasksInput) ([]types.Task, error) {
 	coll := r.mongoClient.Database("pipeline").Collection("pipelines")
 	filter := bson.M{"_id": input.PipelineId}
 
@@ -52,7 +52,7 @@ func (r *Repository) GetTasks(ctx context.Context, input model.GetTasksInput) ([
 		filter["tasks.upstreamtaskid"] = input.UpstreamTaskId
 	}
 
-	var pipeline model.Pipeline
+	var pipeline types.Pipeline
 	err := coll.FindOne(ctx, filter).Decode(&pipeline)
 
 	if err != nil {
@@ -62,7 +62,7 @@ func (r *Repository) GetTasks(ctx context.Context, input model.GetTasksInput) ([
 	return pipeline.Tasks, nil
 }
 
-func (r *Repository) DeleteTask(ctx context.Context, input *model.DeleteTaskInput) error {
+func (r *Repository) DeleteTask(ctx context.Context, input *types.DeleteTaskInput) error {
 	coll := r.mongoClient.Database("pipeline").Collection("pipelines")
 	filter := bson.M{"_id": input.PipelineId}
 	update := bson.M{"$pull": bson.M{"tasks": bson.M{"id": input.Id}}}
@@ -71,7 +71,7 @@ func (r *Repository) DeleteTask(ctx context.Context, input *model.DeleteTaskInpu
 	return err
 }
 
-func (r *Repository) UpdateTask(ctx context.Context, input model.UpdateTaskInput) error {
+func (r *Repository) UpdateTask(ctx context.Context, input types.UpdateTaskInput) error {
 	filter := bson.M{"_id": input.PipelineId, "tasks.id": input.Id}
 
 	doc := bson.M{}
@@ -113,16 +113,16 @@ func (r *Repository) UpdateTask(ctx context.Context, input model.UpdateTaskInput
 	return err
 }
 
-func (r *Repository) UpdateTaskStatus(ctx context.Context, input *model.UpdateTaskStatusInput) error {
+func (r *Repository) UpdateTaskStatus(ctx context.Context, input *types.UpdateTaskStatusInput) error {
 	filter := bson.M{"_id": input.PipelineId, "tasks.id": input.TaskId}
 
 	doc := bson.M{"tasks.$.status": input.Task.Status}
 
 	switch input.Task.Status {
-	case model.TaskInProgress:
+	case types.TaskInProgress:
 		doc["tasks.$.executedat"] = primitive.NewDateTimeFromTime(time.Now().UTC())
 		doc["tasks.$.stoppedat"] = nil
-	case model.TaskDone, model.TaskFailed, model.TaskCanceled:
+	case types.TaskDone, types.TaskFailed, types.TaskCanceled:
 		doc["tasks.$.stoppedat"] = primitive.NewDateTimeFromTime(time.Now().UTC())
 	}
 
