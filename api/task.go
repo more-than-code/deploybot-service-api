@@ -28,7 +28,7 @@ func (a *Api) PostTask() gin.HandlerFunc {
 			return
 		}
 
-		ctx.JSON(http.StatusOK, types.PostTaskResponse{Payload: &types.PostTaskResponsePayload{id}})
+		ctx.JSON(http.StatusOK, types.PostTaskResponse{Payload: &types.PostTaskResponsePayload{Id: id}})
 	}
 }
 

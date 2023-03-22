@@ -25,7 +25,7 @@ func (a *Api) PostPipeline() gin.HandlerFunc {
 			return
 		}
 
-		ctx.JSON(http.StatusOK, types.PostPipelineResponse{Payload: &types.PostPipelineResponsePayload{id}})
+		ctx.JSON(http.StatusOK, types.PostPipelineResponse{Payload: &types.PostPipelineResponsePayload{Id: id}})
 	}
 
 }
@@ -85,7 +85,7 @@ func (a *Api) GetPipeline() gin.HandlerFunc {
 			return
 		}
 
-		ctx.JSON(http.StatusOK, types.GetPipelineResponse{Payload: &types.GetPipelineResponsePayload{*pl}})
+		ctx.JSON(http.StatusOK, types.GetPipelineResponse{Payload: &types.GetPipelineResponsePayload{Pipeline: *pl}})
 	}
 }
 

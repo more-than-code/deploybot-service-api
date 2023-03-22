@@ -67,7 +67,61 @@ func (a *Api) Authenticate() gin.HandlerFunc {
 
 		ctx.JSON(http.StatusOK, res)
 	}
+}
 
+func (a *Api) AuthenticateSso() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		var input types.AuthenticationSsoInput
+		err := ctx.BindJSON(&input)
+
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, types.PostPipelineResponse{Code: types.CodeClientError, Msg: err.Error()})
+			return
+		}
+
+		claims, err := util.GetGoogleAuthClaims(a.googleClientId, input.IdToken)
+
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, types.PostPipelineResponse{Code: types.CodeClientError, Msg: err.Error()})
+			return
+		}
+
+		user, err := a.repo.GetOrCreateUserBySubject(ctx, claims)
+
+		res := types.AuthenticationResponse{}
+
+		if err != nil {
+			log.Println(err)
+			res.Code = types.CodeClientError
+			res.Msg = err.Error()
+			ctx.JSON(http.StatusBadRequest, res)
+			return
+		}
+
+		partialUser := &types.User{Id: user.Id}
+		bytes, _ := json.Marshal(partialUser)
+
+		output := types.AuthenticationOutput{}
+		at, err := a.atHelper.Authenticate(string(bytes))
+
+		if err != nil {
+			log.Println(err)
+			res.Code = types.CodeAuthenticationFailure
+			res.Msg = types.MsgAuthenticationFailure
+			ctx.JSON(http.StatusBadRequest, res)
+			return
+		}
+
+		output.AccessToken = at
+
+		rt, _ := a.rtHelper.Authenticate(user.Id.Hex())
+		output.RefreshToken = rt
+		output.UserId = user.Id
+
+		res.Payload = &output
+
+		ctx.JSON(http.StatusOK, res)
+	}
 }
 
 func (a *Api) PostUser() gin.HandlerFunc {
@@ -115,10 +169,15 @@ func (a *Api) DeleteUser() gin.HandlerFunc {
 
 func (a *Api) GetUser() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		id := ctx.Param("id")
+		idStr := ctx.Query("id")
 
-		objId, _ := primitive.ObjectIDFromHex(id)
-		user, err := a.repo.GetUserById(ctx, objId)
+		var id primitive.ObjectID
+		if idStr == "" {
+			id = util.GetUserFromContext(ctx).Id
+		} else {
+			id, _ = primitive.ObjectIDFromHex(idStr)
+		}
+		user, err := a.repo.GetUserById(ctx, id)
 
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, types.GetUserResponse{Code: types.CodeClientError, Msg: err.Error()})

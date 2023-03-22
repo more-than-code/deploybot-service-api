@@ -50,6 +50,7 @@ func main() {
 		authorized.PATCH("/member", api.PatchMember())
 
 		g.POST("/authenticate", api.Authenticate())
+		g.POST("/authenticateSso", api.AuthenticateSso())
 		authorized.POST("/user", api.PostUser())
 		authorized.GET("/user", api.GetUser())
 		authorized.GET("/users", api.GetUsers())

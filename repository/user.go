@@ -22,6 +22,8 @@ func (r *Repository) CreateUser(ctx context.Context, input *types.CreateUserInpu
 	coll := r.mongoClient.Database("pipeline").Collection("users")
 
 	doc := util.StructToBsonDoc(input)
+	doc["name"] = input.Name
+	doc["subject"] = input.Email
 	doc["password"] = hashedPassword
 	doc["createdat"] = primitive.NewDateTimeFromTime(time.Now().UTC())
 
@@ -83,6 +85,37 @@ func (r *Repository) GetUserByEmail(ctx context.Context, email string) (*types.U
 	}
 
 	return user, nil
+}
+
+func (r *Repository) GetOrCreateUserBySubject(ctx context.Context, claims *types.Claims) (*types.User, error) {
+	coll := r.mongoClient.Database("pipeline").Collection("users")
+
+	filter := bson.M{}
+	filter["subject"] = claims.Sub
+
+	doc := bson.M{}
+	doc["subject"] = claims.Sub
+	doc["email"] = claims.Sub
+	doc["contactemail"] = claims.Email
+	doc["avatarurl"] = claims.Picture
+	doc["name"] = claims.Name
+	doc["createdat"] = primitive.NewDateTimeFromTime(time.Now().UTC())
+
+	update := bson.M{"$set": doc}
+
+	upsert := true
+	after := options.After
+	opts := options.FindOneAndUpdateOptions{Upsert: &upsert, ReturnDocument: &after}
+
+	user := types.User{}
+
+	err := coll.FindOneAndUpdate(ctx, filter, update, &opts).Decode(&user)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
 }
 
 func (r *Repository) GetUserById(ctx context.Context, id primitive.ObjectID) (*types.User, error) {

@@ -7,19 +7,21 @@ import (
 )
 
 type Config struct {
-	MinuteAt int    `envconfig:"AT_TTL_MINUTE"`
-	HourAt   int    `envconfig:"AT_TTL_HOUR"`
-	DayAt    int    `envconfig:"AT_TTL_DAY"`
-	MinuteRt int    `envconfig:"RT_TTL_MINUTE"`
-	HourRt   int    `envconfig:"RT_TTL_HOUR"`
-	DayRt    int    `envconfig:"RT_TTL_DAY"`
-	Secret   []byte `envconfig:"TOKEN_SECRET_KEY"`
+	MinuteAt       int    `envconfig:"AT_TTL_MINUTE"`
+	HourAt         int    `envconfig:"AT_TTL_HOUR"`
+	DayAt          int    `envconfig:"AT_TTL_DAY"`
+	MinuteRt       int    `envconfig:"RT_TTL_MINUTE"`
+	HourRt         int    `envconfig:"RT_TTL_HOUR"`
+	DayRt          int    `envconfig:"RT_TTL_DAY"`
+	Secret         []byte `envconfig:"TOKEN_SECRET_KEY"`
+	GoogleClientId string `envconfig:"GOOGLE_CLIENT_ID"`
 }
 
 type Api struct {
-	repo     *repository.Repository
-	atHelper *authHelper.Helper
-	rtHelper *authHelper.Helper
+	repo           *repository.Repository
+	atHelper       *authHelper.Helper
+	rtHelper       *authHelper.Helper
+	googleClientId string
 }
 
 func NewApi() *Api {
@@ -37,5 +39,5 @@ func NewApi() *Api {
 	if err != nil {
 		panic(err)
 	}
-	return &Api{repo: r, atHelper: athelper, rtHelper: rthelper}
+	return &Api{repo: r, atHelper: athelper, rtHelper: rthelper, googleClientId: cfg.GoogleClientId}
 }
