@@ -95,6 +95,9 @@ func (r *Repository) UpdateTask(ctx context.Context, input types.UpdateTaskInput
 	if input.Task.StreamWebhook != nil {
 		doc["tasks.$.streamwebhook"] = input.Task.StreamWebhook
 	}
+	if input.Task.LogUrl != nil {
+		doc["tasks.$.logurl"] = input.Task.LogUrl
+	}
 	if input.Task.UpstreamTaskId != nil {
 		doc["tasks.$.upstreamtaskid"] = input.Task.UpstreamTaskId
 	}
