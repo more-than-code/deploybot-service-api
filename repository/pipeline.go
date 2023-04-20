@@ -95,27 +95,8 @@ func (r *Repository) GetPipeline(ctx context.Context, input types.GetPipelineInp
 func (r *Repository) UpdatePipeline(ctx context.Context, input types.UpdatePipelineInput) error {
 	filter := bson.M{"_id": input.Id}
 
-	doc := bson.M{}
+	doc := util.StructToBsonDoc(input.Pipeline)
 	doc["updatedat"] = primitive.NewDateTimeFromTime(time.Now().UTC())
-
-	if input.Pipeline.Name != nil {
-		doc["name"] = input.Pipeline.Name
-	}
-	if input.Pipeline.ScheduledAt != nil {
-		doc["scheduledat"] = input.Pipeline.ScheduledAt
-	}
-	if input.Pipeline.AutoRun != nil {
-		doc["autorun"] = input.Pipeline.AutoRun
-	}
-	if input.Pipeline.Arguments != nil {
-		doc["arguments"] = input.Pipeline.Arguments
-	}
-	if input.Pipeline.RepoWatched != nil {
-		doc["repowatched"] = input.Pipeline.RepoWatched
-	}
-	if input.Pipeline.BranchWatched != nil {
-		doc["branchwatched"] = input.Pipeline.BranchWatched
-	}
 
 	update := bson.M{"$set": doc}
 
