@@ -46,6 +46,22 @@ func (a *Api) GetProjects() gin.HandlerFunc {
 	}
 }
 
+func (a *Api) GetProject() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		idStr := ctx.Param("id")
+		id, _ := primitive.ObjectIDFromHex(idStr)
+
+		output, err := a.repo.GetProject(ctx, types.GetProjectInput{Id: id, UserId: util.GetUserFromContext(ctx).Id})
+
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, types.GetProjectsResponse{Code: types.CodeClientError, Msg: err.Error()})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, types.GetProjectResponse{Payload: output})
+	}
+}
+
 func (a *Api) DeleteProject() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		id := ctx.Param("pid")

@@ -41,6 +41,7 @@ func main() {
 		authorized.PUT("/taskStatus", api.PutTaskStatus())
 
 		authorized.GET("/projects", api.GetProjects())
+		authorized.GET("/project/:id", api.GetProject())
 		authorized.DELETE("/project/:id", api.DeleteProject())
 		authorized.POST("/project", api.PostProject())
 		authorized.PATCH("/project/:id", api.PatchProject())

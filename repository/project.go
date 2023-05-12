@@ -57,11 +57,13 @@ func (r *Repository) DeleteProject(ctx context.Context, input types.DeleteProjec
 	return nil
 }
 
-func (r *Repository) GetProject(ctx context.Context, projectId primitive.ObjectID) (*types.Project, error) {
+func (r *Repository) GetProject(ctx context.Context, input types.GetProjectInput) (*types.Project, error) {
+	filter := bson.M{"members.userid": bson.M{"$in": bson.A{input.UserId}}, "_id": input.Id}
+
 	var project types.Project
 
 	coll := r.mongoClient.Database("pipeline").Collection("projects")
-	err := coll.FindOne(ctx, bson.M{"_id": projectId}).Decode(&project)
+	err := coll.FindOne(ctx, filter).Decode(&project)
 
 	if err != nil {
 		log.Println(err)
