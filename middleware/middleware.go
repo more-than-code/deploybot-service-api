@@ -55,3 +55,18 @@ func AuthRequired() gin.HandlerFunc {
 		c.AbortWithStatus(http.StatusUnauthorized)
 	}
 }
+
+func ApiKeyRequired() gin.HandlerFunc {
+
+	return func(c *gin.Context) {
+		key := c.Request.Header.Get("X-Api-Key")
+
+		// TODO: implementation for validity check
+		if len(key) >= 16 {
+			c.Next()
+			return
+		}
+
+		c.AbortWithStatus(http.StatusUnauthorized)
+	}
+}

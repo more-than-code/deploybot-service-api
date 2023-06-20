@@ -21,12 +21,11 @@ func main() {
 	}
 
 	g := gin.Default()
+	api := api.NewApi()
 
 	authorized := g.Group("/")
-
 	authorized.Use(middleware.AuthRequired())
 	{
-		api := api.NewApi()
 		authorized.GET("/pipelines", api.GetPipelines())
 		authorized.GET("/pipeline", api.GetPipeline())
 		authorized.DELETE("/pipeline/:id", api.DeletePipeline())
@@ -56,6 +55,16 @@ func main() {
 		authorized.GET("/user", api.GetUser())
 		authorized.GET("/users", api.GetUsers())
 		authorized.DELETE("/user/:id", api.DeleteUser())
+	}
+
+	saAuthorized := g.Group("/sa/")
+	saAuthorized.Use(middleware.ApiKeyRequired())
+	{
+		saAuthorized.GET("/pipeline", api.GetPipeline())
+		saAuthorized.PUT("/pipelineStatus", api.PutPipelineStatus())
+
+		saAuthorized.GET("/task", api.GetTask())
+		saAuthorized.PUT("/taskStatus", api.PutTaskStatus())
 	}
 
 	g.GET("/healthCheck", HealthCheckHandler())
