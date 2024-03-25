@@ -5,15 +5,71 @@ import (
 	"strings"
 	"time"
 
-	types "github.com/more-than-code/deploybot-service-api/deploybot-types"
-	"github.com/more-than-code/deploybot-service-api/util"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func (r *Repository) CreateUser(ctx context.Context, input *types.CreateUserInput) error {
-	hashedPassword, err := util.HashPassword(input.Password)
+type AuthenticationInput struct {
+	Email    string
+	Password string
+}
+
+type AuthenticationSsoInput struct {
+	IdToken string
+}
+
+type AuthenticationOutput struct {
+	UserId       primitive.ObjectID `json:"userId"`
+	AccessToken  string             `json:"accessToken"`
+	RefreshToken string             `json:"refreshToken"`
+}
+
+type User struct {
+	Id           primitive.ObjectID `json:"id" bson:"_id"`
+	Subject      string             `json:"subject"`
+	Email        string             `json:"email"`
+	ContactEmail string             `json:"contactEmail"`
+	Password     string             `json:"password"`
+	Name         string             `json:"name"`
+	AvatarUrl    string             `json:"avatarUrl"`
+	CreatedAt    primitive.DateTime `json:"createdAt"`
+}
+
+type CreateUserInput struct {
+	Name             string
+	Email            string
+	Password         string
+	VerificationCode string
+}
+
+type GetUsersInput struct {
+	UserIds []primitive.ObjectID
+}
+
+type GetUsersOutput struct {
+	Items      []User `json:"items"`
+	TotalCount int    `json:"totalCount"`
+}
+
+type Claims struct {
+	Iss           string
+	Nbf           int64
+	Aud           string
+	Sub           string
+	Email         string
+	EmailVerified bool `json:"email_verified"`
+	Azp           string
+	Name          string
+	Picture       string
+	GivenName     string `json:"given_name"`
+	Iat           int64
+	Exp           int64
+	Jti           string
+}
+
+func (r *Repository) CreateUser(ctx context.Context, input *CreateUserInput) error {
+	hashedPassword, err := HashPassword(input.Password)
 
 	if err != nil {
 		return err
@@ -21,7 +77,7 @@ func (r *Repository) CreateUser(ctx context.Context, input *types.CreateUserInpu
 
 	coll := r.mongoClient.Database("pipeline").Collection("users")
 
-	doc := util.StructToBsonDoc(input)
+	doc := StructToBsonDoc(input)
 	doc["name"] = input.Name
 	doc["subject"] = input.Email
 	doc["password"] = hashedPassword
@@ -36,7 +92,7 @@ func (r *Repository) CreateUser(ctx context.Context, input *types.CreateUserInpu
 	return nil
 }
 
-func (r *Repository) GetUsers(ctx context.Context, input types.GetUsersInput) (*types.GetUsersOutput, error) {
+func (r *Repository) GetUsers(ctx context.Context, input GetUsersInput) (*GetUsersOutput, error) {
 	coll := r.mongoClient.Database("pipeline").Collection("users")
 
 	filter := bson.M{"_id": bson.M{"$in": input.UserIds}}
@@ -48,7 +104,7 @@ func (r *Repository) GetUsers(ctx context.Context, input types.GetUsersInput) (*
 		return nil, err
 	}
 
-	var output types.GetUsersOutput
+	var output GetUsersOutput
 	if err = cursor.All(ctx, &output.Items); err != nil {
 		return nil, err
 	}
@@ -70,13 +126,13 @@ func (r *Repository) DeleteUser(ctx context.Context, id primitive.ObjectID) erro
 	return nil
 }
 
-func (r *Repository) GetUserByEmail(ctx context.Context, email string) (*types.User, error) {
+func (r *Repository) GetUserByEmail(ctx context.Context, email string) (*User, error) {
 	coll := r.mongoClient.Database("pipeline").Collection("users")
 
 	filter := bson.M{}
 	filter["email"] = strings.ToLower(email)
 
-	user := &types.User{}
+	user := &User{}
 
 	err := coll.FindOne(ctx, filter).Decode(user)
 
@@ -87,7 +143,7 @@ func (r *Repository) GetUserByEmail(ctx context.Context, email string) (*types.U
 	return user, nil
 }
 
-func (r *Repository) GetOrCreateUserBySubject(ctx context.Context, claims *types.Claims) (*types.User, error) {
+func (r *Repository) GetOrCreateUserBySubject(ctx context.Context, claims *Claims) (*User, error) {
 	coll := r.mongoClient.Database("pipeline").Collection("users")
 
 	filter := bson.M{}
@@ -107,7 +163,7 @@ func (r *Repository) GetOrCreateUserBySubject(ctx context.Context, claims *types
 	after := options.After
 	opts := options.FindOneAndUpdateOptions{Upsert: &upsert, ReturnDocument: &after}
 
-	user := types.User{}
+	user := User{}
 
 	err := coll.FindOneAndUpdate(ctx, filter, update, &opts).Decode(&user)
 
@@ -118,10 +174,10 @@ func (r *Repository) GetOrCreateUserBySubject(ctx context.Context, claims *types
 	return &user, nil
 }
 
-func (r *Repository) GetUserById(ctx context.Context, id primitive.ObjectID) (*types.User, error) {
+func (r *Repository) GetUserById(ctx context.Context, id primitive.ObjectID) (*User, error) {
 	coll := r.mongoClient.Database("pipeline").Collection("users")
 
-	user := &types.User{}
+	user := &User{}
 
 	opts := options.FindOneOptions{Projection: bson.M{"password": 0}}
 

@@ -4,6 +4,7 @@ import (
 	"github.com/kelseyhightower/envconfig"
 	authHelper "github.com/more-than-code/auth-helper"
 	"github.com/more-than-code/deploybot-service-api/repository"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Config struct {
@@ -22,6 +23,11 @@ type Api struct {
 	atHelper       *authHelper.Helper
 	rtHelper       *authHelper.Helper
 	googleClientId string
+}
+
+type TaskFilter struct {
+	UpstreamTaskId *primitive.ObjectID
+	AutoRun        *bool
 }
 
 func NewApi() *Api {

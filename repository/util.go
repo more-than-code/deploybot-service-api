@@ -1,4 +1,4 @@
-package util
+package repository
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
-	types "github.com/more-than-code/deploybot-service-api/deploybot-types"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/api/idtoken"
@@ -39,17 +39,17 @@ func CheckPasswordHash(password, hash string) error {
 	return err
 }
 
-func GetUserFromContext(gc *gin.Context) types.User {
+func GetUserFromContext(gc *gin.Context) User {
 	param := gc.Param("user")
 
-	var user types.User
+	var user User
 
 	json.Unmarshal([]byte(param), &user)
 
 	return user
 }
 
-func GetGoogleAuthClaims(clientId, token string) (*types.Claims, error) {
+func GetGoogleAuthClaims(clientId, token string) (*Claims, error) {
 	payload, err := idtoken.Validate(context.Background(), token, clientId)
 
 	if err != nil {
@@ -58,7 +58,7 @@ func GetGoogleAuthClaims(clientId, token string) (*types.Claims, error) {
 
 	fmt.Print(payload)
 
-	var claims types.Claims
+	var claims Claims
 
 	bs, err := json.Marshal(payload.Claims)
 

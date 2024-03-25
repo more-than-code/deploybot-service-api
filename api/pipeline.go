@@ -5,27 +5,28 @@ import (
 
 	"github.com/gin-gonic/gin"
 	types "github.com/more-than-code/deploybot-service-api/deploybot-types"
+	"github.com/more-than-code/deploybot-service-api/repository"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func (a *Api) PostPipeline() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		var input types.CreatePipelineInput
+		var input repository.CreatePipelineInput
 		err := ctx.BindJSON(&input)
 
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, types.PostPipelineResponse{Code: types.CodeClientError, Msg: err.Error()})
+			ctx.JSON(http.StatusBadRequest, PostPipelineResponse{Code: types.CodeClientError, Msg: err.Error()})
 			return
 		}
 
 		id, err := a.repo.CreatePipeline(ctx, &input)
 
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, types.PostPipelineResponse{Code: types.CodeServerError, Msg: err.Error()})
+			ctx.JSON(http.StatusBadRequest, PostPipelineResponse{Code: types.CodeServerError, Msg: err.Error()})
 			return
 		}
 
-		ctx.JSON(http.StatusOK, types.PostPipelineResponse{Payload: &types.PostPipelineResponsePayload{Id: id}})
+		ctx.JSON(http.StatusOK, PostPipelineResponse{Payload: &PostPipelineResponsePayload{Id: id}})
 	}
 
 }
@@ -60,14 +61,14 @@ func (a *Api) GetPipelines() gin.HandlerFunc {
 			ar = &cVal
 		}
 
-		output, err := a.repo.GetPipelines(ctx, types.GetPipelinesInput{RepoWatched: rw, BranchWatched: bw, AutoRun: ar, ProjectId: pid})
+		output, err := a.repo.GetPipelines(ctx, repository.GetPipelinesInput{RepoWatched: rw, BranchWatched: bw, AutoRun: ar, ProjectId: pid})
 
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, types.GetPipelinesResponse{Code: types.CodeClientError, Msg: err.Error()})
+			ctx.JSON(http.StatusBadRequest, GetPipelinesResponse{Code: types.CodeClientError, Msg: err.Error()})
 			return
 		}
 
-		ctx.JSON(http.StatusOK, types.GetPipelinesResponse{Payload: output})
+		ctx.JSON(http.StatusOK, GetPipelinesResponse{Payload: output})
 	}
 }
 
@@ -77,15 +78,15 @@ func (a *Api) GetPipeline() gin.HandlerFunc {
 		idStr := ctx.Query("id")
 		id, _ := primitive.ObjectIDFromHex(idStr)
 
-		input := types.GetPipelineInput{Name: name, Id: id}
+		input := repository.GetPipelineInput{Name: name, Id: id}
 		pl, err := a.repo.GetPipeline(ctx, input)
 
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, types.GetPipelineResponse{Code: types.CodeClientError, Msg: err.Error()})
+			ctx.JSON(http.StatusBadRequest, GetPipelineResponse{Code: types.CodeClientError, Msg: err.Error()})
 			return
 		}
 
-		ctx.JSON(http.StatusOK, types.GetPipelineResponse{Payload: &types.GetPipelineResponsePayload{Pipeline: *pl}})
+		ctx.JSON(http.StatusOK, GetPipelineResponse{Payload: &GetPipelineResponsePayload{Pipeline: *pl}})
 	}
 }
 
@@ -97,52 +98,52 @@ func (a *Api) DeletePipeline() gin.HandlerFunc {
 		err := a.repo.DeletePipeline(ctx, objId)
 
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, types.DeletePipelineResponse{Code: types.CodeClientError, Msg: err.Error()})
+			ctx.JSON(http.StatusBadRequest, DeletePipelineResponse{Code: types.CodeClientError, Msg: err.Error()})
 			return
 		}
 
-		ctx.JSON(http.StatusOK, types.DeletePipelineResponse{})
+		ctx.JSON(http.StatusOK, DeletePipelineResponse{})
 	}
 }
 
 func (a *Api) PatchPipeline() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		var input types.UpdatePipelineInput
+		var input repository.UpdatePipelineInput
 		err := ctx.BindJSON(&input)
 
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, types.PatchPipelineResponse{Code: types.CodeClientError, Msg: err.Error()})
+			ctx.JSON(http.StatusBadRequest, PatchPipelineResponse{Code: types.CodeClientError, Msg: err.Error()})
 			return
 		}
 
 		err = a.repo.UpdatePipeline(ctx, input)
 
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, types.PatchPipelineResponse{Code: types.CodeServerError, Msg: err.Error()})
+			ctx.JSON(http.StatusBadRequest, PatchPipelineResponse{Code: types.CodeServerError, Msg: err.Error()})
 			return
 		}
 
-		ctx.JSON(http.StatusOK, types.PatchPipelineResponse{})
+		ctx.JSON(http.StatusOK, PatchPipelineResponse{})
 	}
 }
 
 func (a *Api) PutPipelineStatus() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		var input types.UpdatePipelineStatusInput
+		var input repository.UpdatePipelineStatusInput
 		err := ctx.BindJSON(&input)
 
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, types.PutPipelineStatusResponse{Code: types.CodeClientError, Msg: err.Error()})
+			ctx.JSON(http.StatusBadRequest, PutPipelineStatusResponse{Code: types.CodeClientError, Msg: err.Error()})
 			return
 		}
 
 		err = a.repo.UpdatePipelineStatus(ctx, input)
 
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, types.PutPipelineStatusResponse{Code: types.CodeServerError, Msg: err.Error()})
+			ctx.JSON(http.StatusBadRequest, PutPipelineStatusResponse{Code: types.CodeServerError, Msg: err.Error()})
 			return
 		}
 
-		ctx.JSON(http.StatusOK, types.PutPipelineStatusResponse{})
+		ctx.JSON(http.StatusOK, PutPipelineStatusResponse{})
 	}
 }

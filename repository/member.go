@@ -6,13 +6,40 @@ import (
 	"time"
 
 	types "github.com/more-than-code/deploybot-service-api/deploybot-types"
-	"github.com/more-than-code/deploybot-service-api/util"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func (r *Repository) CreateMember(ctx context.Context, input types.CreateMemberInput) error {
-	member := util.StructToBsonDoc(input.Member)
+type Member struct {
+	UserId    primitive.ObjectID `json:"userId"`
+	Role      types.Role         `json:"role"`
+	CreatedAt primitive.DateTime `json:"datetimeCreated"`
+}
+
+type CreateMemberInput struct {
+	ProjectId primitive.ObjectID
+	Member    struct {
+		UserId primitive.ObjectID
+		Role   types.Role
+	}
+}
+
+type DeleteMemberInput struct {
+	ProjectId primitive.ObjectID
+	UserId    primitive.ObjectID
+}
+
+type UpdateMember struct {
+	Role *types.Role
+}
+type UpdateMemberInput struct {
+	ProjectId primitive.ObjectID
+	UserId    primitive.ObjectID
+	Member    UpdateMember
+}
+
+func (r *Repository) CreateMember(ctx context.Context, input CreateMemberInput) error {
+	member := StructToBsonDoc(input.Member)
 	member["createdat"] = primitive.NewDateTimeFromTime(time.Now().UTC())
 
 	update := bson.M{"$push": bson.M{"members": member}}
@@ -29,7 +56,7 @@ func (r *Repository) CreateMember(ctx context.Context, input types.CreateMemberI
 	return nil
 }
 
-func (r *Repository) DeleteMember(ctx context.Context, input types.DeleteMemberInput) error {
+func (r *Repository) DeleteMember(ctx context.Context, input DeleteMemberInput) error {
 	update := bson.M{}
 	update["$pull"] = bson.M{"members": bson.M{"userid": input.UserId}}
 
@@ -49,7 +76,7 @@ func (r *Repository) DeleteMember(ctx context.Context, input types.DeleteMemberI
 	return nil
 }
 
-func (r *Repository) UpdateMember(ctx context.Context, input types.UpdateMemberInput) error {
+func (r *Repository) UpdateMember(ctx context.Context, input UpdateMemberInput) error {
 	filter := bson.M{"_id": input.ProjectId, "members.userid": input.UserId, "owneruserid": bson.M{"$ne": input.UserId}}
 
 	update := bson.M{"$set": bson.M{"members.$.role": input.Member, "members.$.updatedat": primitive.NewDateTimeFromTime(time.Now().UTC())}}

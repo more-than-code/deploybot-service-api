@@ -6,25 +6,26 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	types "github.com/more-than-code/deploybot-service-api/deploybot-types"
-	"github.com/more-than-code/deploybot-service-api/util"
+	"github.com/more-than-code/deploybot-service-api/repository"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func (a *Api) Authenticate() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		var input types.AuthenticationInput
+		var input repository.AuthenticationInput
 		err := ctx.BindJSON(&input)
 
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, types.PostPipelineResponse{Code: types.CodeClientError, Msg: err.Error()})
+			ctx.JSON(http.StatusBadRequest, PostPipelineResponse{Code: types.CodeClientError, Msg: err.Error()})
 			return
 		}
 
 		user, err := a.repo.GetUserByEmail(ctx, input.Email)
 
-		res := types.AuthenticationResponse{}
+		res := AuthenticationResponse{}
 
 		if user == nil {
 			log.Println(err)
@@ -34,7 +35,7 @@ func (a *Api) Authenticate() gin.HandlerFunc {
 			return
 		}
 
-		err = util.CheckPasswordHash(input.Password, user.Password)
+		err = repository.CheckPasswordHash(input.Password, user.Password)
 		if err != nil {
 			log.Println(err)
 			res.Code = types.CodeWrongEmailOrPassword
@@ -43,10 +44,10 @@ func (a *Api) Authenticate() gin.HandlerFunc {
 			return
 		}
 
-		partialUser := &types.User{Id: user.Id}
+		partialUser := &repository.User{Id: user.Id}
 		bytes, _ := json.Marshal(partialUser)
 
-		output := types.AuthenticationOutput{}
+		output := repository.AuthenticationOutput{}
 		at, err := a.atHelper.Authenticate(string(bytes))
 
 		if err != nil {
@@ -71,24 +72,24 @@ func (a *Api) Authenticate() gin.HandlerFunc {
 
 func (a *Api) AuthenticateSso() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		var input types.AuthenticationSsoInput
+		var input repository.AuthenticationSsoInput
 		err := ctx.BindJSON(&input)
 
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, types.PostPipelineResponse{Code: types.CodeClientError, Msg: err.Error()})
+			ctx.JSON(http.StatusBadRequest, PostPipelineResponse{Code: types.CodeClientError, Msg: err.Error()})
 			return
 		}
 
-		claims, err := util.GetGoogleAuthClaims(a.googleClientId, input.IdToken)
+		claims, err := repository.GetGoogleAuthClaims(a.googleClientId, input.IdToken)
 
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, types.PostPipelineResponse{Code: types.CodeClientError, Msg: err.Error()})
+			ctx.JSON(http.StatusBadRequest, PostPipelineResponse{Code: types.CodeClientError, Msg: err.Error()})
 			return
 		}
 
 		user, err := a.repo.GetOrCreateUserBySubject(ctx, claims)
 
-		res := types.AuthenticationResponse{}
+		res := AuthenticationResponse{}
 
 		if err != nil {
 			log.Println(err)
@@ -98,10 +99,10 @@ func (a *Api) AuthenticateSso() gin.HandlerFunc {
 			return
 		}
 
-		partialUser := &types.User{Id: user.Id}
+		partialUser := &repository.User{Id: user.Id}
 		bytes, _ := json.Marshal(partialUser)
 
-		output := types.AuthenticationOutput{}
+		output := repository.AuthenticationOutput{}
 		at, err := a.atHelper.Authenticate(string(bytes))
 
 		if err != nil {
@@ -126,27 +127,27 @@ func (a *Api) AuthenticateSso() gin.HandlerFunc {
 
 func (a *Api) PostUser() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		var input types.CreateUserInput
+		var input repository.CreateUserInput
 		err := ctx.BindJSON(&input)
 
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, types.PostUserResponse{Code: types.CodeClientError, Msg: err.Error()})
+			ctx.JSON(http.StatusBadRequest, PostUserResponse{Code: types.CodeClientError, Msg: err.Error()})
 			return
 		}
 
 		// TODO: validate verification code instead of hard-coding
 		if input.VerificationCode != "1235" {
-			ctx.JSON(http.StatusBadRequest, types.PostUserResponse{Code: types.CodeWrongVerificationCode, Msg: types.MsgWrongVerificationCode})
+			ctx.JSON(http.StatusBadRequest, PostUserResponse{Code: types.CodeWrongVerificationCode, Msg: types.MsgWrongVerificationCode})
 		}
 
 		err = a.repo.CreateUser(ctx, &input)
 
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, types.PostUserResponse{Code: types.CodeServerError, Msg: err.Error()})
+			ctx.JSON(http.StatusBadRequest, PostUserResponse{Code: types.CodeServerError, Msg: err.Error()})
 			return
 		}
 
-		ctx.JSON(http.StatusOK, types.PostUserResponse{})
+		ctx.JSON(http.StatusOK, PostUserResponse{})
 	}
 
 }
@@ -159,11 +160,11 @@ func (a *Api) DeleteUser() gin.HandlerFunc {
 		err := a.repo.DeleteUser(ctx, objId)
 
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, types.DeleteUserResponse{Code: types.CodeClientError, Msg: err.Error()})
+			ctx.JSON(http.StatusBadRequest, DeleteUserResponse{Code: types.CodeClientError, Msg: err.Error()})
 			return
 		}
 
-		ctx.JSON(http.StatusOK, types.DeleteUserResponse{})
+		ctx.JSON(http.StatusOK, DeleteUserResponse{})
 	}
 }
 
@@ -173,18 +174,18 @@ func (a *Api) GetUser() gin.HandlerFunc {
 
 		var id primitive.ObjectID
 		if idStr == "" {
-			id = util.GetUserFromContext(ctx).Id
+			id = repository.GetUserFromContext(ctx).Id
 		} else {
 			id, _ = primitive.ObjectIDFromHex(idStr)
 		}
 		user, err := a.repo.GetUserById(ctx, id)
 
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, types.GetUserResponse{Code: types.CodeClientError, Msg: err.Error()})
+			ctx.JSON(http.StatusBadRequest, GetUserResponse{Code: types.CodeClientError, Msg: err.Error()})
 			return
 		}
 
-		ctx.JSON(http.StatusOK, types.GetUserResponse{Payload: user})
+		ctx.JSON(http.StatusOK, GetUserResponse{Payload: user})
 	}
 }
 
@@ -198,13 +199,13 @@ func (a *Api) GetUsers() gin.HandlerFunc {
 			uidList = append(uidList, uid)
 		}
 
-		output, err := a.repo.GetUsers(ctx, types.GetUsersInput{UserIds: uidList})
+		output, err := a.repo.GetUsers(ctx, repository.GetUsersInput{UserIds: uidList})
 
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, types.GetUsersResponse{Code: types.CodeClientError, Msg: err.Error()})
+			ctx.JSON(http.StatusBadRequest, GetUsersResponse{Code: types.CodeClientError, Msg: err.Error()})
 			return
 		}
 
-		ctx.JSON(http.StatusOK, types.GetUsersResponse{Payload: output})
+		ctx.JSON(http.StatusOK, GetUsersResponse{Payload: output})
 	}
 }

@@ -5,17 +5,94 @@ import (
 	"time"
 
 	types "github.com/more-than-code/deploybot-service-api/deploybot-types"
-	"github.com/more-than-code/deploybot-service-api/util"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func (r *Repository) CreateTask(ctx context.Context, input *types.CreateTaskInput) (primitive.ObjectID, error) {
+type Task struct {
+	Id             primitive.ObjectID `json:"id"`
+	Name           string             `json:"name"`
+	CreatedAt      primitive.DateTime `json:"createdAt"`
+	UpdatedAt      primitive.DateTime `json:"updatedAt"`
+	ExecutedAt     primitive.DateTime `json:"executedAt"`
+	StoppedAt      primitive.DateTime `json:"stoppedAt"`
+	ScheduledAt    primitive.DateTime `json:"scheduledAt"`
+	Status         string             `json:"status"`
+	UpstreamTaskId primitive.ObjectID `json:"upstreamTaskId" bson:",omitempty"`
+	StreamWebhook  string             `json:"streamWebhook" bson:",omitempty"`
+	LogUrl         string             `json:"logUrl" bson:",omitempty"`
+	Config         interface{}        `json:"config"`
+	Remarks        string             `json:"remarks"`
+	AutoRun        bool               `json:"autoRun"`
+	Timeout        int64              `json:"timeout"` // minutes
+	Type           string             `json:"type"`
+}
+
+type UpdateTaskInputTask struct {
+	Name           *string
+	UpstreamTaskId *primitive.ObjectID
+	StreamWebhook  *string
+	LogUrl         *string
+	ScheduledAt    *primitive.DateTime
+	Config         *interface{}
+	Remarks        *string
+	AutoRun        *bool
+	Timeout        *int64
+	Type           *string
+}
+
+type UpdateTaskInput struct {
+	PipelineId primitive.ObjectID
+	Id         primitive.ObjectID
+	Task       UpdateTaskInputTask
+}
+
+type UpdateTaskStatusInput struct {
+	PipelineId primitive.ObjectID
+	TaskId     primitive.ObjectID
+	Task       struct {
+		Status string
+	}
+}
+
+type CreateTaskInputTask struct {
+	Id             primitive.ObjectID
+	Name           string
+	ScheduledAt    primitive.DateTime `bson:",omitempty"`
+	Config         interface{}
+	UpstreamTaskId primitive.ObjectID `bson:",omitempty"`
+	StreamWebhook  string
+	LogUrl         string
+	AutoRun        bool
+	Timeout        int64
+	Type           string
+}
+type CreateTaskInput struct {
+	PipelineId primitive.ObjectID
+	Task       CreateTaskInputTask
+}
+
+type GetTaskInput struct {
+	PipelineId primitive.ObjectID
+	Id         primitive.ObjectID
+}
+
+type GetTasksInput struct {
+	PipelineId     primitive.ObjectID
+	UpstreamTaskId *primitive.ObjectID
+}
+
+type DeleteTaskInput struct {
+	PipelineId primitive.ObjectID
+	Id         primitive.ObjectID
+}
+
+func (r *Repository) CreateTask(ctx context.Context, input *CreateTaskInput) (primitive.ObjectID, error) {
 	coll := r.mongoClient.Database("pipeline").Collection("pipelines")
 	filter := bson.M{"_id": input.PipelineId}
 
-	doc := util.StructToBsonDoc(input.Task)
+	doc := StructToBsonDoc(input.Task)
 	if input.Task.Id.IsZero() {
 		doc["id"] = primitive.NewObjectID()
 	}
@@ -29,12 +106,12 @@ func (r *Repository) CreateTask(ctx context.Context, input *types.CreateTaskInpu
 	return doc["id"].(primitive.ObjectID), err
 }
 
-func (r *Repository) GetTask(ctx context.Context, input *types.GetTaskInput) (*types.Task, error) {
+func (r *Repository) GetTask(ctx context.Context, input *GetTaskInput) (*Task, error) {
 	coll := r.mongoClient.Database("pipeline").Collection("pipelines")
 	filter := bson.M{"_id": input.PipelineId, "tasks.id": input.Id}
 
 	opts := options.FindOneOptions{Projection: bson.M{"tasks.$": 1}}
-	var pipeline types.Pipeline
+	var pipeline Pipeline
 	err := coll.FindOne(ctx, filter, &opts).Decode(&pipeline)
 
 	if err != nil {
@@ -44,7 +121,7 @@ func (r *Repository) GetTask(ctx context.Context, input *types.GetTaskInput) (*t
 	return &pipeline.Tasks[0], nil
 }
 
-func (r *Repository) GetTasks(ctx context.Context, input types.GetTasksInput) ([]types.Task, error) {
+func (r *Repository) GetTasks(ctx context.Context, input GetTasksInput) ([]Task, error) {
 	coll := r.mongoClient.Database("pipeline").Collection("pipelines")
 	filter := bson.M{"_id": input.PipelineId}
 
@@ -52,7 +129,7 @@ func (r *Repository) GetTasks(ctx context.Context, input types.GetTasksInput) ([
 		filter["tasks.upstreamtaskid"] = input.UpstreamTaskId
 	}
 
-	var pipeline types.Pipeline
+	var pipeline Pipeline
 	err := coll.FindOne(ctx, filter).Decode(&pipeline)
 
 	if err != nil {
@@ -62,7 +139,7 @@ func (r *Repository) GetTasks(ctx context.Context, input types.GetTasksInput) ([
 	return pipeline.Tasks, nil
 }
 
-func (r *Repository) DeleteTask(ctx context.Context, input *types.DeleteTaskInput) error {
+func (r *Repository) DeleteTask(ctx context.Context, input *DeleteTaskInput) error {
 	coll := r.mongoClient.Database("pipeline").Collection("pipelines")
 	filter := bson.M{"_id": input.PipelineId}
 	update := bson.M{"$pull": bson.M{"tasks": bson.M{"id": input.Id}}}
@@ -71,7 +148,7 @@ func (r *Repository) DeleteTask(ctx context.Context, input *types.DeleteTaskInpu
 	return err
 }
 
-func (r *Repository) UpdateTask(ctx context.Context, input types.UpdateTaskInput) error {
+func (r *Repository) UpdateTask(ctx context.Context, input UpdateTaskInput) error {
 	filter := bson.M{"_id": input.PipelineId, "tasks.id": input.Id}
 
 	doc := bson.M{}
@@ -116,7 +193,7 @@ func (r *Repository) UpdateTask(ctx context.Context, input types.UpdateTaskInput
 	return err
 }
 
-func (r *Repository) UpdateTaskStatus(ctx context.Context, input *types.UpdateTaskStatusInput) error {
+func (r *Repository) UpdateTaskStatus(ctx context.Context, input *UpdateTaskStatusInput) error {
 	filter := bson.M{"_id": input.PipelineId, "tasks.id": input.TaskId}
 
 	doc := bson.M{"tasks.$.status": input.Task.Status}
