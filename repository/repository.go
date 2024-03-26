@@ -6,7 +6,6 @@ import (
 
 	"github.com/kelseyhightower/envconfig"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/bsontype"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -28,7 +27,8 @@ func NewRepository() (*Repository, error) {
 
 	tM := reflect.TypeOf(bson.M{})
 
-	reg := bson.NewRegistryBuilder().RegisterTypeMapEntry(bsontype.EmbeddedDocument, tM).Build()
+	reg := bson.NewRegistry()
+	reg.RegisterTypeMapEntry(bson.TypeEmbeddedDocument, tM)
 
 	clientOpts := options.Client().SetRegistry(reg).ApplyURI(cfg.MongoUri)
 
