@@ -66,7 +66,7 @@ func (a *Api) GetProject() gin.HandlerFunc {
 
 func (a *Api) DeleteProject() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		id := ctx.Param("pid")
+		id := ctx.Param("id")
 		objId, _ := primitive.ObjectIDFromHex(id)
 
 		err := a.repo.DeleteProject(ctx, repository.DeleteProjectInput{Id: objId, UserId: repository.GetUserFromContext(ctx).Id})
