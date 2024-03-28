@@ -10,6 +10,14 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+type Server struct {
+	Name        string `json:"name"`
+	Host        string `json:"host"`
+	Port        string `json:"port"`
+	NetworkName string `json:"networkName"`
+	NetworkId   string `json:"networkId"`
+}
+
 type Project struct {
 	Id          primitive.ObjectID `json:"id" bson:"_id"`
 	Name        string             `json:"name"`
@@ -17,18 +25,24 @@ type Project struct {
 	OwnerUserId primitive.ObjectID `json:"ownerUserId"`
 	Members     []Member           `json:"members"`
 	// Pipelines   []Pipeline         `json:"pipelines"`
-	CreatedAt primitive.DateTime `json:"createdAt"`
-	UpdatedAt primitive.DateTime `json:"updatedAt"`
+	CreatedAt     primitive.DateTime `json:"createdAt"`
+	UpdatedAt     primitive.DateTime `json:"updatedAt"`
+	BuildServers  []Server           `json:"buildServers"`
+	DeployServers []Server           `json:"deployServers"`
 }
 
 type CreateProjectInput struct {
-	Name   string
-	UserId primitive.ObjectID
+	Name          string
+	UserId        primitive.ObjectID
+	BuildServers  []Server `bson:",omitempty"`
+	DeployServers []Server `bson:",omitempty"`
 }
 
 type UpdateProject struct {
-	Name      *string `bson:",omitempty"`
-	AvatarUrl *string `bson:",omitempty"`
+	Name          *string  `bson:",omitempty"`
+	AvatarUrl     *string  `bson:",omitempty"`
+	BuildServers  []Server `bson:",omitempty"`
+	DeployServers []Server `bson:",omitempty"`
 }
 
 type UpdateProjectInput struct {
@@ -57,9 +71,14 @@ type GetProjectsOutput struct {
 }
 
 func (r *Repository) CreateProject(ctx context.Context, input *CreateProjectInput) (primitive.ObjectID, error) {
-	doc := bson.M{"owneruserid": input.UserId, "createdat": primitive.NewDateTimeFromTime(time.Now().UTC()),
-		"name":    input.Name,
-		"members": bson.A{bson.M{"userid": input.UserId, "role": types.RoleOwner, "createdat": primitive.NewDateTimeFromTime(time.Now().UTC())}}}
+	doc := bson.M{
+		"owneruserid":   input.UserId,
+		"createdat":     primitive.NewDateTimeFromTime(time.Now().UTC()),
+		"name":          input.Name,
+		"members":       bson.A{bson.M{"userid": input.UserId, "role": types.RoleOwner, "createdat": primitive.NewDateTimeFromTime(time.Now().UTC())}},
+		"buildservers":  input.BuildServers,
+		"deployservers": input.DeployServers,
+	}
 
 	coll := r.mongoClient.Database("pipeline").Collection("projects")
 
