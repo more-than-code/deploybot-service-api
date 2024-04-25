@@ -11,11 +11,10 @@ import (
 )
 
 type Server struct {
-	Name        string `json:"name"`
-	Host        string `json:"host"`
-	Port        string `json:"port"`
-	NetworkName string `json:"networkName"`
-	NetworkId   string `json:"networkId"`
+	Name     string            `json:"name"`
+	Host     string            `json:"host"`
+	Port     string            `json:"port"`
+	Networks map[string]string `json:"networks"`
 }
 
 type Project struct {
@@ -34,15 +33,15 @@ type Project struct {
 type CreateProjectInput struct {
 	Name          string
 	UserId        primitive.ObjectID
-	BuildServers  []Server `bson:",omitempty"`
-	DeployServers []Server `bson:",omitempty"`
+	BuildServers  []Server `json:"buildServers" bson:",omitempty"`
+	DeployServers []Server `json:"deployServers" bson:",omitempty"`
 }
 
 type UpdateProject struct {
-	Name          *string  `bson:",omitempty"`
-	AvatarUrl     *string  `bson:",omitempty"`
-	BuildServers  []Server `bson:",omitempty"`
-	DeployServers []Server `bson:",omitempty"`
+	Name          *string  `json:"name" bson:",omitempty"`
+	AvatarUrl     *string  `json:"avatarUrl" bson:",omitempty"`
+	BuildServers  []Server `json:"buildServers" bson:",omitempty"`
+	DeployServers []Server `json:"deployServers" bson:",omitempty"`
 }
 
 type UpdateProjectInput struct {
