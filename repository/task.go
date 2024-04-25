@@ -10,10 +10,29 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+type Task struct {
+	Id             primitive.ObjectID `json:"id"`
+	Name           string             `json:"name"`
+	CreatedAt      primitive.DateTime `json:"createdAt"`
+	UpdatedAt      primitive.DateTime `json:"updatedAt"`
+	ExecutedAt     primitive.DateTime `json:"executedAt"`
+	StoppedAt      primitive.DateTime `json:"stoppedAt"`
+	ScheduledAt    primitive.DateTime `json:"scheduledAt"`
+	Status         string             `json:"status"`
+	UpstreamTaskId primitive.ObjectID `json:"upstreamTaskId" bson:",omitempty"`
+	WebhookHost    string             `json:"webhookHost" bson:",omitempty"`
+	LogUrl         string             `json:"logUrl" bson:",omitempty"`
+	Config         interface{}        `json:"config"`
+	Remarks        string             `json:"remarks"`
+	AutoRun        bool               `json:"autoRun"`
+	Timeout        int64              `json:"timeout"` // minutes
+	Type           string             `json:"type"`
+}
+
 type UpdateTaskInputTask struct {
 	Name           *string
 	UpstreamTaskId *primitive.ObjectID
-	StreamWebhook  *string
+	WebhookHost    *string
 	LogUrl         *string
 	ScheduledAt    *primitive.DateTime
 	Config         *interface{}
@@ -43,7 +62,7 @@ type CreateTaskInputTask struct {
 	ScheduledAt    primitive.DateTime `bson:",omitempty"`
 	Config         interface{}
 	UpstreamTaskId primitive.ObjectID `bson:",omitempty"`
-	StreamWebhook  string
+	WebhookHost    string
 	LogUrl         string
 	AutoRun        bool
 	Timeout        int64
@@ -87,7 +106,7 @@ func (r *Repository) CreateTask(ctx context.Context, input *CreateTaskInput) (pr
 	return doc["id"].(primitive.ObjectID), err
 }
 
-func (r *Repository) GetTask(ctx context.Context, input *GetTaskInput) (*types.Task, error) {
+func (r *Repository) GetTask(ctx context.Context, input *GetTaskInput) (*Task, error) {
 	coll := r.mongoClient.Database("pipeline").Collection("pipelines")
 	filter := bson.M{"_id": input.PipelineId, "tasks.id": input.Id}
 
@@ -102,7 +121,7 @@ func (r *Repository) GetTask(ctx context.Context, input *GetTaskInput) (*types.T
 	return &pipeline.Tasks[0], nil
 }
 
-func (r *Repository) GetTasks(ctx context.Context, input GetTasksInput) ([]types.Task, error) {
+func (r *Repository) GetTasks(ctx context.Context, input GetTasksInput) ([]Task, error) {
 	coll := r.mongoClient.Database("pipeline").Collection("pipelines")
 	filter := bson.M{"_id": input.PipelineId}
 
@@ -150,8 +169,8 @@ func (r *Repository) UpdateTask(ctx context.Context, input UpdateTaskInput) erro
 	if input.Task.AutoRun != nil {
 		doc["tasks.$.autorun"] = input.Task.AutoRun
 	}
-	if input.Task.StreamWebhook != nil {
-		doc["tasks.$.streamwebhook"] = input.Task.StreamWebhook
+	if input.Task.WebhookHost != nil {
+		doc["tasks.$.webhookhost"] = input.Task.WebhookHost
 	}
 	if input.Task.LogUrl != nil {
 		doc["tasks.$.logurl"] = input.Task.LogUrl

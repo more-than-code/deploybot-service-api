@@ -22,7 +22,7 @@ type Pipeline struct {
 	Status        string             `json:"status"`
 	Arguments     []string           `json:"arguments"`
 	Labels        map[string]*string `json:"labels"`
-	Tasks         []types.Task       `json:"tasks"`
+	Tasks         []Task             `json:"tasks"`
 	RepoWatched   string             `json:"repoWatched"`
 	BranchWatched string             `json:"branchWatched"`
 	AutoRun       bool               `json:"autoRun"`
