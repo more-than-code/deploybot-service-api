@@ -56,7 +56,7 @@ type PostTaskResponse struct {
 }
 
 type GetTaskResponsePayload struct {
-	Task repository.Task
+	Task types.Task `json:"task"`
 }
 type GetTaskResponse struct {
 	Code    int                     `json:"code"`

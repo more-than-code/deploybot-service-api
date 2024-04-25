@@ -13,7 +13,6 @@ import (
 type Server struct {
 	Name     string            `json:"name"`
 	Host     string            `json:"host"`
-	Port     string            `json:"port"`
 	Networks map[string]string `json:"networks"`
 }
 

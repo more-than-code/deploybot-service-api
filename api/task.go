@@ -3,6 +3,7 @@ package api
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -131,7 +132,7 @@ func (a *Api) PutTaskStatus() gin.HandlerFunc {
 				for _, t := range pl.Tasks {
 					body, _ := json.Marshal(types.StreamWebhook{Payload: types.StreamWebhookPayload{PipelineId: types.ObjectId(pl.Id), TaskId: types.ObjectId(t.Id), Arguments: pl.Arguments}})
 
-					req, _ := http.NewRequest("POST", t.StreamWebhook, bytes.NewReader(body))
+					req, _ := http.NewRequest("POST", fmt.Sprintf("https://%s/streamWebhook", t.WebhookHost), bytes.NewReader(body))
 					res, _ := http.DefaultClient.Do(req)
 
 					if res != nil {
