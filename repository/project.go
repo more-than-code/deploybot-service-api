@@ -96,7 +96,8 @@ func (r *Repository) UpdateProject(ctx context.Context, input UpdateProjectInput
 	project := StructToBsonDoc(input.Project)
 
 	update := bson.M{"$set": project}
-	filter := bson.M{"_id": input.Id, "owneruserid": input.UserId}
+	filter := bson.M{"_id": input.Id, "members.userid": input.UserId}
+
 	_, err := coll.UpdateOne(ctx, filter, update)
 
 	if err != nil {
